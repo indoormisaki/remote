@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>マインスイーパ</title>
+<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+</head>
+<body>
+	<div>
+		<div>難易度を選択してください</div>
+		<div>
+			<form th:action="@{/game}" th:object="${levelForm}" method="POST">
+				<div>
+					<select th:field="*{id}">
+						<option th:each="level: ${levels}" th:value="${level.id}"
+							th:text="${level.name}"></option>
+					</select>
+				</div>
+				<div>
+					<input type="submit" value="スタート">
+				</div>
+			</form>
+		</div>
+	</div>
+</body>
+</html>
