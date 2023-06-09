@@ -29,15 +29,15 @@ body > div {
 
 table {
 	border-collapse: collapse;
+	border: 10px inset #888;
 }
 
 td {
 	width: 25px;
 	height: 25px;
-	background-color: #ccc;
-	box-shadow: 1px 1px 2px rgba( 0, 0, 0, 0.9);
+	background-color: #bbb;
 	text-align: center;
-	font-size: 12px;
+	font-size: 18px;
 	font-weight: bold;
 }
 
@@ -47,12 +47,8 @@ td {
 }
 
 .open {
-	background-color: #ddd;
-	border: 1px solid #888;
-}
-
-.is-zero {
-	font-size: 0px;
+	border: 2px solid #aaa;
+	background-color: #ccc;
 }
 
 .is-mine {
@@ -60,8 +56,44 @@ td {
 }
 
 .flag {
-	font-size: 12px;
-	color: #006400;
+	font-size: 18px;
+	color: red;
+}
+
+.is-zero {
+	font-size: 0px;
+}
+
+.is-one {
+	color: #0000ff;
+}
+
+.is-two {
+	color: #228b22;
+}
+
+.is-three {
+	color: #ff0000;
+}
+
+.is-four {
+	color: #000080;
+}
+
+.is-five {
+	color: #8b0000;
+}
+
+.is-six {
+	color: #20b2aa;
+}
+
+.is-seven {
+	color: blue;
+}
+
+.is-eight {
+	color: blue;
 }
 
 /* form */

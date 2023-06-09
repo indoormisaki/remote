@@ -1,21 +1,24 @@
-let row;
-let column;
-let allCells;
-let mine;
-let gameOver = false;
-let isFirstOpen = true;
-let progress = 0;
+//変数定義
+let row; // 行数
+let column; // 列数
+let allCells; // 総マス数
+let mine; // 地雷の数
+let gameOver = false; // ゲーム継続を判定
+let isFirstOpen = true; // 最初に開けたマスかどうかを判定
+let progress = 0; // ゲームの進行状況を判定
+// タイマーの変数定義
+let startTime = 0; // 開始時間
+let elapsedTime = 0; // 経過時間
+let timerInterval; // タイマーのインターバル
 
 // 初期化
 window.onload = function() {
 	row = parseInt(document.getElementById("levelRow").innerHTML);
-	console.log(row);
 	column = parseInt(document.getElementById("levelColumn").innerHTML);
-	console.log(column);
 	mine = parseInt(document.getElementById("levelMine").innerHTML);
-	console.log(mine);
 	allCells = row * column;
 
+	// 初手フラグ追加
 	document.addEventListener("click", firstOpen);
 
 	// 右クリック時に旗を立てる処理
@@ -37,10 +40,26 @@ window.onload = function() {
 					event.target.classList.add("flag");
 					event.target.textContent = "▲";
 				}
+				checkRemainingMine();
 			}
 		});
 	});
 };
+
+// タイマー機能
+// テキスト表示のフォーマット関数
+function formatTime(time) {
+	const seconds = Math.floor(time / 1000);
+	return `${seconds}`;
+}
+
+// タイマーの更新関数
+function updateTimer() {
+	const currentTime = Date.now();
+	elapsedTime += currentTime - startTime;
+	startTime = currentTime;
+	document.getElementById("timer").textContent = formatTime(elapsedTime);
+}
 
 // 最初に開けたマスを0として地雷を生成する
 function firstOpen(event) {
@@ -66,7 +85,13 @@ function firstOpen(event) {
 
 		// 初手のマスを開ける
 		openCell(firstCellIndex);
+
+		// 初手フラグ削除
 		document.removeEventListener("click", firstOpen);
+
+		// タイマーを開始する
+		startTime = Date.now();
+		timerInterval = setInterval(updateTimer, 1000);
 	}
 }
 
@@ -119,6 +144,18 @@ function getAroundCellIndex(currentCellIndex) {
 	return around;
 }
 
+function getAroundFlag(around) {
+	// 周囲のフラッグをカウントする変数
+	let flagCounter = 0;
+	// 周囲8マスのフラッグの数を集計
+	for (let i = 0; i < around.length; i++) {
+		if ($('#board td').eq(around[i]).hasClass("flag")) {
+			flagCounter++;
+		}
+	}
+	return flagCounter;
+}
+
 // クリックされたマスの周囲8マスの地雷の数を取得する
 function getAroundMine(around) {
 	// 周囲の地雷をカウントする変数
@@ -135,52 +172,94 @@ function getAroundMine(around) {
 // マスを開き、周囲の地雷の数を表示する
 // 周囲の地雷が0個の場合、クラス"is-zero"を付与する
 function openCell(cellIndex) {
-	if (gameOver) {
+	let cellElement = $('#board td').eq(cellIndex);
+	if (gameOver || cellElement.hasClass("flag")) {
 		return;
 	}
-	if ($('#board td').eq(cellIndex).hasClass("flag")) {
-		return;
-	}
-	// 周囲8マスの位置を配列で取得
-	let around = getAroundCellIndex(cellIndex);
-	$('#board td').eq(cellIndex).addClass("open");
-	$('#board td').eq(cellIndex).removeClass("closed");
-	$('#board td').eq(cellIndex).text(getAroundMine(around));
-	progress += 1;
-	if (progress == allCells - mine) {
-		gameClear();
-	}
-	if (getAroundMine(around) == 0) {
-		$('#board td').eq(cellIndex).addClass("is-zero");
-	}
-	if ($('#board td').eq(cellIndex).hasClass("is-zero")) {
-		for (let i = 0; i < around.length; i++) {
-			if (!$('#board td').eq(around[i]).hasClass("open")) {
-				openCell(around[i], getAroundCellIndex(around[i]));
+
+	if (cellElement.hasClass("is-mine")) {
+		cellElement.addClass("open");
+		cellElement.removeClass("closed");
+		gameOver = true;
+		$(".game-message").text("GAME OVER");
+		clearInterval(timerInterval);
+	} else {
+		// 周囲8マスの位置を配列で取得
+		let around = getAroundCellIndex(cellIndex);
+		cellElement.addClass("open");
+		cellElement.removeClass("closed");
+		cellElement.text(getAroundMine(around));
+
+		// 数字別で色分け
+		switch (cellElement.text()) {
+		case "1":
+			cellElement.addClass("is-one");
+			break;
+		case "2":
+			cellElement.addClass("is-two");
+			break;
+		case "3":
+			cellElement.addClass("is-three");
+			break;
+		case "4":
+			cellElement.addClass("is-four");
+			break;
+		case "5":
+			cellElement.addClass("is-five");
+			break;
+		case "6":
+			cellElement.addClass("is-six");
+			break;
+		case "7":
+			cellElement.addClass("is-seven");
+			break;
+		case "8":
+			cellElement.addClass("is-eight");
+			break;
+		}
+
+		// ゲームクリアかどうかを判定
+		checkProgress();
+
+		// 開けたマスが0の場合の処理
+		if (getAroundMine(around) == 0) {
+			cellElement.addClass("is-zero");
+		}
+		if (cellElement.hasClass("is-zero")) {
+			for (let i = 0; i < around.length; i++) {
+				if (!$('#board td').eq(around[i]).hasClass("open")) {
+					openCell(around[i]);
+				}
 			}
 		}
 	}
 }
 
-// ゲームクリア時の処理
-function gameClear() {
-	$(".game-message").text("GAME CLEAR");
-	gameOver = true;
+// 残りの爆弾数を表示
+function checkRemainingMine() {
+	let flagCell = document.querySelectorAll(".flag").length;
+	let remainingMine = mine - flagCell;
+	$("#remaining-mine").text(remainingMine);
 }
 
-// クリックするとマスを開く
+// ゲームクリア判定
+function checkProgress() {
+	let openCells = document.querySelectorAll(".open");
+	progress = openCells.length;
+	if (progress == allCells - mine) {
+		gameOver = true;
+		$(".game-message").text("GAME CLEAR");
+		clearInterval(timerInterval);
+		document.getElementById("score").textContent = formatTime(elapsedTime);
+	}
+}
+
+// 開いていないマスをクリックするとマスを開く
 // 1.地雷のあるマスの場合…「GAME OVER」を表示
 // 2.地雷のないマスの場合…クリックしたマスにgetAroundMineメソッドの戻り値を表示
 $(function() {
 	$(".closed").click(function() {
-		if ($(this).hasClass("is-mine")) {
-			if (gameOver == false && !$(this).hasClass("flag")) {
-				$(this).addClass("open");
-				$(this).removeClass("closed");
-				gameOver = true;
-				$(".game-message").text("GAME OVER");
-			}
-		} else if (isFirstOpen) {
+		if (isFirstOpen) {
 			isFirstOpen = false;
 		} else {
 			// クリックされたマスの位置を取得
@@ -191,15 +270,51 @@ $(function() {
 	});
 });
 
+// 開いているマスをクリックしたときの処理
+// マスの数字と周囲のフラグ数が一致した場合、周囲のフラグ以外のマスを開く
+$(function() {
+	$(document).on("click", ".open", function() {
+		let around = getAroundCellIndex(getClickedCellIndex(this));
+		if ($(this).text() == getAroundFlag(around)) {
+			for (let i = 0; i < around.length; i++) {
+				if (!$('#board td').eq(around[i]).hasClass("open")) {
+					openCell(around[i]);
+				}
+			}
+		}
+	});
+});
+
 // リセットボタン押下時、ゲームを初期状態に戻す
 $(function() {
-	$(".reset").click(function() {
+	$(".reset-game").click(function() {
+		// 全てのマスの持つクラスをclosedクラスのみにする
 		$(".open").addClass("closed");
 		$(".open").removeClass("open");
 		$(".flag").removeClass("flag");
 		$(".game-message").text("");
 		$(".is-zero").removeClass("is-zero");
+		$(".is-one").removeClass("is-one");
+		$(".is-two").removeClass("is-two");
+		$(".is-three").removeClass("is-three");
+		$(".is-four").removeClass("is-four");
+		$(".is-five").removeClass("is-five");
+		$(".is-six").removeClass("is-six");
+		$(".is-seven").removeClass("is-seven");
+		$(".is-eight").removeClass("is-eight");
+		$(".is-mine").removeClass("is-mine");
+
+		// 全てのマスを空白にする
+		$("td").text("");
+
+		// ゲームの進行状況を初期状態に戻す
 		gameOver = false;
 		progress = 0;
+
+		// タイマーをリセットする
+		clearInterval(timerInterval);
+		elapsedTime = 0;
+		document.getElementById("timer").textContent = formatTime(elapsedTime);
+		document.addEventListener("click", firstOpen);
 	});
 });

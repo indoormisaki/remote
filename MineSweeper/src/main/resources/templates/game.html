@@ -13,15 +13,23 @@
 		<div th:text="${level.mine}" id="levelMine" class="metadata"></div>
 		<div th:text="${level.fieldColumn}" id="levelColumn" class="metadata"></div>
 		<div th:text="${level.fieldRow}" id="levelRow" class="metadata"></div>
-		<button class="reset">リセット</button>
+		<button class="reset-game">リセット</button>
+		<div>
+			残り爆弾数：<span th:text="${level.mine}" id="remaining-mine"></span>
+		</div>
+	</div>
+	<div class="timer">
+		タイム：<span id="timer">0</span>秒
 	</div>
 	<div>
 		<table id="board">
 			<tr th:each="i: ${#numbers.sequence(1,__${level.fieldRow}__)}">
-				<td th:each="i: ${#numbers.sequence(1,__${level.fieldColumn}__)}" class="closed"></td>
+				<td th:each="i: ${#numbers.sequence(1,__${level.fieldColumn}__)}"
+					class="closed"></td>
 			</tr>
 		</table>
 	</div>
 	<div class="game-message"></div>
+	<div id="score"></div>
 </body>
 </html>
