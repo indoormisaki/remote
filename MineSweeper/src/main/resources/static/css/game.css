@@ -12,45 +12,99 @@ body > div {
 	display: none;
 }
 
-.easy {
-	display: block;
-}
-
-.normal, .hard {
+.hidden {
 	display: none;
 }
 
-table {
-  width: 40%;
+.ranking-table {
+  width: 100%;
   margin-bottom: 1rem;
   color: #212529;
   border-collapse: collapse;
-  counter-reset: ranking 0;
 }
 
-tr:nth-child(odd) {
-  background-color: #ecf0f1;
+/* game design */
+.cell {
+	margin: 1px;
+	width: 20px;
+	height: 20px;
+	background-color: #ccc;
+	box-shadow: 1px 1px 2px rgba( 0, 0, 0, 0.9);
+	text-align: center;
+	display: table;
 }
 
-th,td {
-  padding: 0.75rem;
-  border-top: 1px solid #dee2e6;
-  border: none;
-  text-align: center;
+.game-message {
+	font-size: 20px;
 }
 
-th {
-  background-color: #2c3e50;
-  color: #fff;
+#board {
+	border-collapse: collapse;
+	border: 10px inset #888;
 }
 
-td:nth-child(n+2) {
-  margin-left: 0.5rem;
+td {
+	width: 25px;
+	height: 25px;
+	background-color: #bbb;
+	text-align: center;
+	font-size: 18px;
+	font-weight: bold;
 }
 
-.rank-row:before {
-	counter-increment: ranking 1;
-	content: counter(ranking);
+.closed {
+	font-size: 0px;
+	border: 3px outset #ccc;
+}
+
+.open {
+	border: 2px solid #aaa;
+	background-color: #ccc;
+}
+
+.is-mine {
+	/*background-color: red;*/
+}
+
+.flag {
+	font-size: 18px;
+	color: red;
+}
+
+.is-zero {
+	font-size: 0px;
+}
+
+.is-one {
+	color: #0000ff;
+}
+
+.is-two {
+	color: #228b22;
+}
+
+.is-three {
+	color: #ff0000;
+}
+
+.is-four {
+	color: #000080;
+}
+
+.is-five {
+	color: #8b0000;
+}
+
+.is-six {
+	color: #20b2aa;
+}
+
+.is-seven {
+	color: blue;
+}
+
+.is-eight {
+	color: blue;
 }
 
 /* form */
@@ -109,5 +163,5 @@ button:hover, input[type="submit"]:hover {
 }
 
 .form-row > input, select {
-  width: 100px;
+  width: 70%;
 }

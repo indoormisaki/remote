@@ -13,9 +13,9 @@ let timerInterval; // タイマーのインターバル
 
 // 初期化
 window.onload = function() {
-	row = parseInt(document.getElementById("levelRow").innerHTML);
-	column = parseInt(document.getElementById("levelColumn").innerHTML);
-	mine = parseInt(document.getElementById("levelMine").innerHTML);
+	row = parseInt(document.getElementById("level-row").innerHTML);
+	column = parseInt(document.getElementById("level-column").innerHTML);
+	mine = parseInt(document.getElementById("level-mine").innerHTML);
 	allCells = row * column;
 
 	// 初手フラグ追加
@@ -249,8 +249,11 @@ function checkProgress() {
 	if (progress == allCells - mine) {
 		gameOver = true;
 		$(".game-message").text("GAME CLEAR");
+		$(".score-form").removeClass("hidden");
 		clearInterval(timerInterval);
 		document.getElementById("score").textContent = formatTime(elapsedTime);
+		document.getElementById("score-form").value = formatTime(elapsedTime);
+		document.getElementById("level-form").value = document.getElementById("level-id").innerHTML;
 	}
 }
 
@@ -293,6 +296,8 @@ $(function() {
 		$(".open").removeClass("open");
 		$(".flag").removeClass("flag");
 		$(".game-message").text("");
+		$("#score").text("");
+		$(".score-form").addClass("hidden");
 		$(".is-zero").removeClass("is-zero");
 		$(".is-one").removeClass("is-one");
 		$(".is-two").removeClass("is-two");
@@ -309,6 +314,7 @@ $(function() {
 
 		// ゲームの進行状況を初期状態に戻す
 		gameOver = false;
+		isFirstOpen = true;
 		progress = 0;
 
 		// タイマーをリセットする

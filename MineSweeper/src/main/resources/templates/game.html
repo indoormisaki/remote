@@ -3,16 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <title>マインスイーパ</title>
-<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+<link rel="stylesheet" type="text/css" th:href="@{/css/game.css}">
 <script type="text/javascript" th:src="@{/js/jquery-3.6.4.min.js}"></script>
-<script type="text/javascript" th:src="@{/js/jquery.js}"></script>
+<script type="text/javascript" th:src="@{/js/game.js}"></script>
 </head>
 <body>
 	<div>
-		<div th:text="'難易度：' + ${level.name}" class="level"></div>
-		<div th:text="${level.mine}" id="levelMine" class="metadata"></div>
-		<div th:text="${level.fieldColumn}" id="levelColumn" class="metadata"></div>
-		<div th:text="${level.fieldRow}" id="levelRow" class="metadata"></div>
+		<div th:text="${level.id}" id="level-id" class="hidden"></div>
+		<div th:text="'難易度：' + ${level.name}" id="level-name" class="level"></div>
+		<div th:text="${level.mine}" id="level-mine" class="metadata"></div>
+		<div th:text="${level.fieldColumn}" id="level-column" class="metadata"></div>
+		<div th:text="${level.fieldRow}" id="level-row" class="metadata"></div>
 		<button class="reset-game">リセット</button>
 		<div>
 			残り爆弾数：<span th:text="${level.mine}" id="remaining-mine"></span>
@@ -30,6 +31,15 @@
 		</table>
 	</div>
 	<div class="game-message"></div>
-	<div id="score"></div>
+	<form class="score-form hidden" th:action="@{/index}" th:object="${form}" method="POST">
+		<input type="hidden" th:field="*{levelId}" id="level-form">
+		<input type="hidden" th:field="*{score}" id="score-form">
+		<div>クリアタイム：<span id="score"></span>秒</div>
+		<div>名前：<input type="text" th:field="*{name}"></div>
+		<input type="submit" value="登録">
+	</form>
+	<div class="backButton">
+		<a th:href="@{/index}">戻る</a>
+	</div>
 </body>
 </html>

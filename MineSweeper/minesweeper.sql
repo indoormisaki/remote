@@ -7,6 +7,13 @@ CREATE TABLE `levels` (
   `mine` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `rankings` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(20) DEFAULT NULL,
+  `score` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ALTER TABLE rankings ADD level_id int(11);
 INSERT INTO levels (
     id,
     name,
@@ -50,3 +57,22 @@ SELECT
 			levels
 		WHERE
 			id = 2;
+            
+SELECT
+			name,
+			score,
+			level_id AS levelId
+		FROM
+			rankings
+        ORDER BY
+            score ASC;
+DELETE FROM rankings WHERE id = 4;
+INSERT INTO rankings(
+    name,
+    score,
+    level_id
+) VALUE (
+    "ccccc",
+    200,
+    3
+);

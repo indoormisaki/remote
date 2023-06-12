@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <title>マインスイーパ</title>
 <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+<script type="text/javascript" th:src="@{/js/jquery-3.6.4.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/index.js}"></script>
 </head>
 <body>
 	<div>
@@ -20,6 +22,52 @@
 					<input type="submit" value="スタート">
 				</div>
 			</form>
+		</div>
+		<div>
+			<div>ランキング</div>
+			<div>
+				<button id="easy-button">初級</button>
+				<button id="normal-button">中級</button>
+				<button id="hard-button">上級</button>
+			</div>
+			<table class="ranking-table easy">
+				<tr id="easy-header">
+					<th>順位</th>
+					<th>名前</th>
+					<th>クリアタイム</th>
+				</tr>
+				<tr th:each="ranking: ${easyRankings}">
+					<td><span class="rank-row"></span>位</td>
+					<td th:text="${ranking.name}"></td>
+					<td><span th:text="${ranking.score}"></span>秒</td>
+				</tr>
+			</table>
+
+			<table class="ranking-table normal">
+				<tr id="normal-header">
+					<th>順位</th>
+					<th>名前</th>
+					<th>クリアタイム</th>
+				</tr>
+				<tr th:each="ranking: ${normalRankings}">
+					<td><span class="rank-row"></span>位</td>
+					<td th:text="${ranking.name}"></td>
+					<td><span th:text="${ranking.score}"></span>秒</td>
+				</tr>
+			</table>
+
+			<table class="ranking-table hard">
+				<tr id="hard-header">
+					<th>順位</th>
+					<th>名前</th>
+					<th>クリアタイム</th>
+				</tr>
+				<tr th:each="ranking: ${hardRankings}">
+					<td><span class="rank-row"></span>位</td>
+					<td th:text="${ranking.name}"></td>
+					<td><span th:text="${ranking.score}"></span>秒</td>
+				</tr>
+			</table>
 		</div>
 	</div>
 </body>
