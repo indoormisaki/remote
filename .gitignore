@@ -6,3 +6,6 @@ bin
 *.out
 target
 /.recommenders/
+Pokemon.zip
+Pokemon/
+cache.db
