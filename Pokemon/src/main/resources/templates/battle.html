@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>pokemon battle</title>
+<link rel="stylesheet" type="text/css" th:href="@{/css/battle.css}">
+</head>
+<body>
+	<div id="game-screen">
+		<img id="enemyImg" th:src="${enemyPokemonData.frontSprite}">
+
+		<div id="enemy-stats-window" class="stats-window">
+			<div th:text="${enemyPokemonData.name}" id="enemy-name" class="pokemon-name"></div>
+			<div class="pokemon-level">Lv：<span id="enemy-pokemon-level">50</span></div>
+			<div id="enemy-ailment-stats" class="aliment-stats"></div>
+			<div id="enemy-hp-frame" class="hp-frame">
+				<div id="enemy-hp-bar" class="hp-bar"></div>
+				<div id="enemy-hp-mark" class="mark"></div>
+			</div>
+
+			<div id="enemy-hp-value" class="hidden">
+				<span id="enemy-current-hp" th:text="${enemyPokemonStats.hp}"></span>
+				<span> / </span>
+				<span id="enemy-max-hp" th:text="${enemyPokemonStats.hp}"></span>
+			</div>
+			<div class="pokemon-stats hidden">
+				<div id="enemy-types">
+					<div th:each="type, i: ${enemyPokemonData.types}" th:text="${type}" th:id="'enemy-pokemon-type-' + ${i.index+1}"></div>
+				</div>
+				<div id="enemy-attack" th:text="${enemyPokemonStats.attack}"></div>
+				<div id="enemy-defense" th:text="${enemyPokemonStats.defense}"></div>
+				<div id="enemy-special-attack" th:text="${enemyPokemonStats.specialAttack}"></div>
+				<div id="enemy-special-defense" th:text="${enemyPokemonStats.specialDefense}"></div>
+				<div id="enemy-speed" th:text="${enemyPokemonStats.speed}"></div>
+			</div>
+		</div>
+
+		<img id="myImg" th:src="${myPokemonData.backSprite}">
+
+		<div id="my-stats-window" class="stats-window">
+			<div th:text="${myPokemonData.name}" id="my-name" class="pokemon-name"></div>
+			<div class="pokemon-level">Lv：<span id="my-pokemon-level">50</span></div>
+			<div id="my-ailment-stats" class="aliment-stats"></div>
+			<div id="my-hp-frame" class="hp-frame">
+				<div id="my-hp-bar" class="hp-bar"></div>
+				<div id="my-hp-mark" class="mark"></div>
+			</div>
+
+			<div id="my-hp-value">
+				<span id="my-current-hp" th:text="${myPokemonStats.hp}"></span>
+				<span> / </span>
+				<span id="my-max-hp" th:text="${myPokemonStats.hp}"></span>
+			</div>
+			<div class="pokemon-stats hidden">
+				<div id="my-types">
+					<div th:each="type, i: ${myPokemonData.types}" th:text="${type}" th:id="'my-pokemon-type-' + ${i.index+1}"></div>
+				</div>
+				<div id="my-attack" th:text="${myPokemonStats.attack}"></div>
+				<div id="my-defense" th:text="${myPokemonStats.defense}"></div>
+				<div id="my-special-attack" th:text="${myPokemonStats.specialAttack}"></div>
+				<div id="my-special-defense" th:text="${myPokemonStats.specialDefense}"></div>
+				<div id="my-speed" th:text="${myPokemonStats.speed}"></div>
+			</div>
+		</div>
+	</div>
+
+	<div id="message-window">
+		<span id="other-message"></span>
+		<span id="pokemon-name-message"></span><br>
+		<span id="move-message"></span><br>
+		<span id="effective-message"></span>
+	</div>
+
+	<div class="command">
+		<div th:each="myPokemonMove, i : ${myPokemonMoves}">
+				<button th:text="${myPokemonMove.name}" class="move" th:id="'my-move-' + ${i.index+1}"></button>
+				<div th:text="${myPokemonMove.type}" th:id="'my-type-' + ${i.index+1}" class="move-type hidden"></div>
+				<div th:text="${myPokemonMove.power}" th:id="'my-power-' + ${i.index+1}" class="move-power hidden"></div>
+				<div th:text="${myPokemonMove.pp}" th:id="'my-pp-' + ${i.index+1}" class="move-pp hidden"></div>
+				<div th:text="${myPokemonMove.accuracy}" th:id="'my-accuracy-' + ${i.index+1}" class="move-accuracy hidden"></div>
+				<div th:text="${myPokemonMove.damageClass}" th:id="'my-damage-class-' + ${i.index+1}" class="move-damage-class hidden"></div>
+				<div th:text="${myPokemonMove.minHits}" th:id="'my-min-hits-' + ${i.index+1}" class="move-min-hits hidden"></div>
+				<div th:text="${myPokemonMove.maxHits}" th:id="'my-max-hits-' + ${i.index+1}" class="move-max-hits hidden"></div>
+				<div th:text="${myPokemonMove.drain}" th:id="'my-drain-' + ${i.index+1}" class="move-drain hidden"></div>
+				<div th:text="${myPokemonMove.ailment}" th:id="'my-ailment-' + ${i.index+1}" class="move-ailment hidden"></div>
+				<div th:text="${myPokemonMove.ailmentChance}" th:id="'my-ailment-chance-' + ${i.index+1}" class="move-ailment-chance hidden"></div>
+		</div>
+	</div>
+
+	<button id="reset" class="hidden">リセット</button>
+
+	<div class="command">
+		<div th:each="enemyPokemonMove, i : ${enemyPokemonMoves}" class="hidden">
+				<button th:text="${enemyPokemonMove.name}" class="move" th:id="'enemy-move-' + ${i.index+1}"></button>
+				<div th:text="${enemyPokemonMove.type}" th:id="'enemy-type-' + ${i.index+1}" class="move-type hidden"></div>
+				<div th:text="${enemyPokemonMove.power}" th:id="'enemy-power-' + ${i.index+1}" class="move-power hidden"></div>
+				<div th:text="${enemyPokemonMove.pp}" th:id="'enemy-pp-' + ${i.index+1}" class="move-pp hidden"></div>
+				<div th:text="${enemyPokemonMove.accuracy}" th:id="'enemy-accuracy-' + ${i.index+1}" class="move-accuracy hidden"></div>
+				<div th:text="${enemyPokemonMove.damageClass}" th:id="'enemy-damage-class-' + ${i.index+1}" class="move-damage-class hidden"></div>
+				<div th:text="${enemyPokemonMove.minHits}" th:id="'enemy-min-hits-' + ${i.index+1}" class="move-min-hits hidden"></div>
+				<div th:text="${enemyPokemonMove.maxHits}" th:id="'enemy-max-hits-' + ${i.index+1}" class="move-max-hits hidden"></div>
+				<div th:text="${enemyPokemonMove.drain}" th:id="'enemy-drain-' + ${i.index+1}" class="move-drain hidden"></div>
+				<div th:text="${enemyPokemonMove.ailment}" th:id="'enemy-ailment-' + ${i.index+1}" class="move-ailment"></div>
+				<div th:text="${enemyPokemonMove.ailmentChance}" th:id="'enemy-ailment-chance-' + ${i.index+1}" class="move-ailment-chance"></div>
+		</div>
+	</div>
+
+	<script type="text/javascript" th:src="@{/js/jquery-3.6.4.min.js}"></script>
+	<script type="text/javascript" th:src="@{/js/battle.js}"></script>
+</body>
+</html>
