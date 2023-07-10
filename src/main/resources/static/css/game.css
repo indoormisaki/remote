@@ -1,0 +1,169 @@
+/* general */
+div {
+  padding: 0.25rem;
+}
+
+body > div {
+  width: 90%;
+  margin: 0 auto;
+}
+
+.metadata {
+	display: none;
+}
+
+.hidden {
+	display: none;
+}
+
+.ranking-table {
+  width: 100%;
+  margin-bottom: 1rem;
+  color: #212529;
+  border-collapse: collapse;
+}
+
+/* game design */
+.cell {
+	margin: 1px;
+	width: 20px;
+	height: 20px;
+	background-color: #ccc;
+	box-shadow: 1px 1px 2px rgba( 0, 0, 0, 0.9);
+	text-align: center;
+	display: table;
+}
+
+.game-message {
+	font-size: 20px;
+}
+
+#board {
+	border-collapse: collapse;
+	border: 10px inset #888;
+}
+
+td {
+	margin: 0;
+	padding: 0;
+	width: 22px;
+	height: 22px;
+	background-color: #bbb;
+	text-align: center;
+	font-size: 15px;
+	font-weight: bold;
+}
+
+.closed {
+	font-size: 0px;
+	border: 3px outset #ccc;
+}
+
+.open {
+	border: 2px solid #aaa;
+	background-color: #ccc;
+}
+
+.is-mine {
+	/*background-color: red;*/
+}
+
+.flag {
+	font-size: 15px;
+	color: red;
+}
+
+.is-zero {
+	font-size: 0px;
+}
+
+.is-one {
+	color: #0000ff;
+}
+
+.is-two {
+	color: #228b22;
+}
+
+.is-three {
+	color: #ff0000;
+}
+
+.is-four {
+	color: #000080;
+}
+
+.is-five {
+	color: #8b0000;
+}
+
+.is-six {
+	color: #20b2aa;
+}
+
+.is-seven {
+	color: blue;
+}
+
+.is-eight {
+	color: blue;
+}
+
+/* form */
+input, select {
+  height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  line-height: 1.5;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+button, input[type="submit"] {
+  display: inline-block;
+  font-weight: 400;
+  color: #212529;
+  text-align: center;
+  vertical-align: middle;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-color: transparent;
+  border: 1px solid transparent;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  color: #2c3e50;
+  background-color: #fff;
+  border-color: #2c3e50;
+}
+
+button:hover, input[type="submit"]:hover {
+  color: #fff;
+  background-color: #2c3e50;
+  border-color: #2c3e50;
+}
+
+.form-body {
+  width: 75%;
+}
+
+.form-row {
+  padding: 0.25rem;
+}
+
+.form-row > label {
+  width: 20%;
+  display: inline-block;
+}
+
+.form-row > input, select {
+  width: 70%;
+}

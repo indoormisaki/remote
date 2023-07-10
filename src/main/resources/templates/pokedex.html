@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>pokemon sample</title>
+<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+<script type="text/javascript" th:src="@{/js/jquery-3.6.4.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/index.js}"></script>
+</head>
+<body>
+	<div>
+		<img th:src="${pokemonData.frontSprite}">
+		<img th:src="${pokemonData.backSprite}">
+		<div>図鑑No：<span th:text="${pokemonData.id}"></span></div>
+		<div>なまえ：<span th:text="${pokemonData.name}"></span></div>
+		<div th:each="type: ${pokemonData.types}">
+			<div>タイプ：<span th:text="${type}"></span></div>
+		</div>
+		<div th:each="ability: ${pokemonData.abilities}">
+			<div>とくせい：<span th:text="${ability}"></span></div>
+		</div>
+		<div>たかさ：<span th:text="${pokemonData.height}"></span>m</div>
+		<div>おもさ：<span th:text="${pokemonData.weight}"></span>kg</div>
+		<div th:each="baseStat: ${pokemonData.baseStats}">
+			<div>HP：<span th:text="${baseStat.hp}"></span></div>
+			<div>こうげき：<span th:text="${baseStat.attack}"></span></div>
+			<div>ぼうぎょ：<span th:text="${baseStat.defense}"></span></div>
+			<div>とくこう：<span th:text="${baseStat.specialAttack}"></span></div>
+			<div>とくぼう：<span th:text="${baseStat.specialDefense}"></span></div>
+			<div>すばやさ：<span th:text="${baseStat.speed}"></span></div>
+		</div>
+	</div>
+</body>
+</html>

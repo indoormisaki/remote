@@ -1,0 +1,208 @@
+/* 画面配置 */
+.hidden {
+	display: none;
+}
+
+#game-screen{
+	position: relative;
+	width: 400px;
+	height: 250px;
+	background-color: #fffafa;
+	border: solid 2px;
+}
+
+#message-window {
+	width: 380px;
+	height: 100px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+	padding: 10px;
+	border: solid 2px;
+	border-radius: 10px;
+	font-size: 20px;
+}
+
+.stats-window {
+	position: absolute;
+	width: 50%;
+	height: 80px;
+	border: solid 2px;
+	border-radius: 10px;
+	background-color: #fffacd;
+}
+
+.pokemon-name {
+	position: absolute;
+	top: 10%;
+	left: 5%;
+}
+
+.pokemon-level {
+	position: absolute;
+	top: 10%;
+	right: 5%;
+}
+
+.aliment-stats {
+	position: absolute;
+	bottom: 27%;
+	left: 5%;
+	font-size: 15px;
+}
+
+.is-burned {
+	color: red;
+}
+
+.is-freezed {
+	color: blue;
+}
+
+.is-poisoned {
+	color: violet;
+}
+
+#myImg {
+	position: absolute;
+	bottom: 0;
+	left: 30px;
+	width: 130px;
+}
+
+#enemyImg {
+	position: absolute;
+	top: 0px;
+	right: 30px;
+	width: 130px;
+}
+
+#my-stats-window {
+	bottom: 8%;
+	right: 3%;
+}
+
+#my-hp-value{
+	position: absolute;
+	bottom: 0px;
+	right: 10px;
+}
+
+#enemy-stats-window {
+	top: 8%;
+	left: 3%;
+}
+
+#enemy-hp-value{
+	position: absolute;
+	bottom: 0px;
+	right: 10px;
+}
+
+.command {
+	margin-left: 20px;
+	width: 400px;
+	display: grid;
+	grid-tamplate- columns: repeat(2, 1fr);
+}
+
+.move {
+	margin: 5px;
+	width: 160px;
+	height: 50px;
+	font-size: 18px;
+	border-radius: 30px;
+}
+
+/* HPゲージ */
+.hp-frame {
+	position: absolute;
+	width: 60%;
+	bottom: 35%;
+	right: 5%;
+    margin: 0 auto;
+    background-color: rgba(10, 0, 50, 0.6);
+    display: flex;
+    padding: 3px 3px;
+}
+
+.hp-bar {
+    height: 3px;
+    background-color: #00FF00;
+    transition: 300ms
+}
+
+.hp-mark {
+    width: 3px;
+    height: 3px;
+    border-radius: 3px;
+    background-color: #00FF00;
+    display: none;
+}
+
+/* 戦闘アニメーション */
+.knockout {
+  animation: knockout-anim 0.5s linear forwards;
+}
+
+@keyframes knockout-anim {
+	100% {
+		opacity: 0;
+	}
+}
+
+/* 技選択肢 */
+.normal {
+	background-color: #F5F5F5;
+}
+.fire {
+	background-color: #FD9745;
+}
+.water {
+	background-color: #5CADDC;
+}
+.electric {
+	background-color: #F5D659;
+}
+.grass {
+	background-color: #51B666;
+}
+.ice {
+	background-color: #7ECFC9;
+}
+.fighting {
+	background-color: #D73A4D;
+}
+.poison {
+	background-color: #B557C9;
+}
+.ground {
+	background-color: #CF8755;
+}
+.flying {
+	background-color: #97B0E8;
+}
+.psychic {
+	background-color: #FD8D89;
+}
+.bug {
+	background-color: #98BE2D;
+}
+.rock {
+	background-color: #CBBE87;
+}
+.ghost {
+	background-color: #6766C4;
+}
+.dragon {
+	background-color: #046FB5;
+}
+.dark {
+	background-color: #546574;
+	color: white;
+}
+.steel {
+	background-color: #4D989E;
+}
+.fairy {
+	background-color: #EF99E0;
+}
