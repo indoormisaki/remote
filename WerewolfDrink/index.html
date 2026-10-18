@@ -75,10 +75,15 @@ input,select{font:inherit;color:var(--text);background:#1b1230;border:1px solid 
 
 <!-- 設定画面 -->
 <section id="setup">
-  <h2>参加者(めくる順)</h2>
+  <h2>参加人数(めくる順)</h2>
   <div class="panel">
-    <div class="row"><input id="nameIn" placeholder="名前を入力" maxlength="12"><button id="addBtn">追加</button></div>
-    <div class="chips" id="players"></div>
+    <div class="row" style="justify-content:center;gap:20px">
+      <button id="minusBtn" style="width:56px;font-size:22px">−</button>
+      <div style="font-size:28px;font-weight:700;min-width:80px;text-align:center"><span id="countNum"></span>人</div>
+      <button id="plusBtn" style="width:56px;font-size:22px">＋</button>
+    </div>
+    <div class="chips" id="players" style="justify-content:center"></div>
+    <div class="status">名前を変えたいときは、名前をタップ(そのままでもOK)</div>
   </div>
 
   <h2>山札(カード)</h2>
@@ -152,15 +157,32 @@ let cards = load("wd_cards", DEFAULT_CARDS);
 let g = null; // ゲーム状態
 
 /* ---------- 設定画面 ---------- */
+const MIN_P = 2, MAX_P = 12;
+function normPlayers(){
+  players = (Array.isArray(players) ? players : []).slice(0, MAX_P);
+  if (!players.length) players = ["プレイヤー1","プレイヤー2","プレイヤー3","プレイヤー4"];
+  while (players.length < MIN_P) players.push("プレイヤー" + (players.length+1));
+}
+function defaultName(){ let n = players.length+1; while (players.includes("プレイヤー"+n)) n++; return "プレイヤー"+n; }
 function renderPlayers(){
+  normPlayers();
+  $("countNum").textContent = players.length;
+  $("minusBtn").disabled = players.length <= MIN_P;
+  $("plusBtn").disabled = players.length >= MAX_P;
   $("players").innerHTML = "";
   players.forEach((p,i)=>{
     const c = document.createElement("span");
-    c.className = "chip";
-    c.append(p);
-    const x = document.createElement("b"); x.textContent = "×";
-    x.onclick = () => { players.splice(i,1); save("wd_players",players); renderPlayers(); };
-    c.append(x); $("players").append(c);
+    c.className = "chip"; c.style.cursor = "pointer";
+    c.textContent = (i+1) + ". " + p;
+    c.onclick = () => {
+      const v = prompt("名前を変更", p);
+      if (v === null) return;
+      const n = v.trim().slice(0,12);
+      if (!n) return;
+      if (players.some((x,j) => j !== i && x === n)) { alert("同じ名前がいます"); return; }
+      players[i] = n; save("wd_players",players); renderPlayers();
+    };
+    $("players").append(c);
   });
 }
 function renderCards(){
@@ -187,14 +209,8 @@ function renderCards(){
 }
 function updateCount(){ $("deckCount").textContent = "合計 " + cards.reduce((s,c)=>s+c.count,0) + " 枚"; }
 
-$("addBtn").onclick = addPlayer;
-$("nameIn").onkeydown = e => { if (e.key==="Enter") addPlayer(); };
-function addPlayer(){
-  const v = $("nameIn").value.trim();
-  if (!v) return;
-  if (players.includes(v)) { alert("同じ名前がいます"); return; }
-  players.push(v); save("wd_players",players); $("nameIn").value=""; renderPlayers();
-}
+$("plusBtn").onclick = () => { if (players.length < MAX_P) { players.push(defaultName()); save("wd_players",players); renderPlayers(); } };
+$("minusBtn").onclick = () => { if (players.length > MIN_P) { players.pop(); save("wd_players",players); renderPlayers(); } };
 $("addCard").onclick = () => { cards.push({emoji:"🍺",name:"新カード",count:1,effect:"self"}); save("wd_cards",cards); renderCards(); };
 $("resetCards").onclick = () => { if (confirm("カードを初期状態に戻しますか?")) { cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)); save("wd_cards",cards); renderCards(); } };
 
