@@ -3,7 +3,7 @@
 	var MOVE_FIELDS = [
 		["type", "type"], ["power", "power"], ["pp", "pp"], ["accuracy", "accuracy"],
 		["damage-class", "damageClass"], ["min-hits", "minHits"], ["max-hits", "maxHits"],
-		["drain", "drain"], ["ailment", "ailment"], ["ailment-chance", "ailmentChance"]
+		["drain", "drain"], ["ailment", "ailment"], ["ailment-chance", "ailmentChance"], ["priority", "priority"]
 	];
 
 	function set(id, value) {

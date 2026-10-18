@@ -168,8 +168,12 @@ function turn(myMoveNum, forcedEnemyMoveNum) {
 		enemyDamageClass = "oneHitKnockout";
 	}
 
-	//	すばやさ判定
-	if (mySpeed > enemySpeed) {
+	// 技の優先度 (でんこうせっか +1 など)。高いほうが先に動き、同じ場合だけすばやさで決める
+	let myPriority = parseInt(document.getElementById("my-priority-" + myMoveNum).textContent) || 0;
+	let enemyPriority = parseInt(document.getElementById("enemy-priority-" + enemyMoveNum).textContent) || 0;
+
+	//	先攻判定 (優先度 -> すばやさ -> 同じならランダム)
+	if (myPriority > enemyPriority || (myPriority == enemyPriority && mySpeed > enemySpeed)) {
 		resetMessage();
 		action(myName, myMoveNum, myAccuracy, myMovePower, myMoveType, myDamageClass, myDrain, myAilment, myAilmentChance, myMinHits, myMaxHits, "my", true);
 		setTimeout(function(){
@@ -178,7 +182,7 @@ function turn(myMoveNum, forcedEnemyMoveNum) {
 				action(enemyName, enemyMoveNum, enemyAccuracy, enemyMovePower, enemyMoveType, enemyDamageClass, enemyDrain, enemyAilment, enemyAilmentChance, enemyMinHits, enemyMaxHits, "enemy", false);
 			}
 		}, 3000);
-	} else if (mySpeed < enemySpeed) {
+	} else if (myPriority < enemyPriority || (myPriority == enemyPriority && mySpeed < enemySpeed)) {
 		resetMessage();
 		action(enemyName, enemyMoveNum, enemyAccuracy, enemyMovePower, enemyMoveType, enemyDamageClass, enemyDrain, enemyAilment, enemyAilmentChance, enemyMinHits, enemyMaxHits, "enemy", true);
 		setTimeout(function(){
