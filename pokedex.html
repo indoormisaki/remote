@@ -2,34 +2,66 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>pokemon sample</title>
-<link rel="stylesheet" type="text/css" href="css/style.css">
-<style>.hidden { display: none; }</style>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>ポケモン図鑑</title>
+<link rel="stylesheet" href="css/base.css">
 </head>
 <body>
-	<div id="message" class="hidden"></div>
-	<div id="loading">読み込み中...</div>
-	<div id="pokedex" class="hidden">
-		<img id="front-sprite" alt="">
-		<img id="back-sprite" alt="">
-		<div>図鑑No：<span id="no"></span></div>
-		<div>なまえ：<span id="name"></span></div>
-		<div id="types"></div>
-		<div id="abilities"></div>
-		<div>たかさ：<span id="height"></span>m</div>
-		<div>おもさ：<span id="weight"></span>kg</div>
-		<div>HP：<span id="hp"></span></div>
-		<div>こうげき：<span id="attack"></span></div>
-		<div>ぼうぎょ：<span id="defense"></span></div>
-		<div>とくこう：<span id="special-attack"></span></div>
-		<div>とくぼう：<span id="special-defense"></span></div>
-		<div>すばやさ：<span id="speed"></span></div>
-	</div>
-	<div><a href="index.html">もどる</a></div>
+<header class="site-header"><div class="inner">
+		<a class="brand" href="index.html"><span class="ball" aria-hidden="true"></span><span>ポケモン図鑑＆バトル</span></a>
+		<nav class="site-nav" aria-label="メインメニュー">
+			<a href="index.html">ホーム</a>
+			<a href="pokedex.html" aria-current="page">図鑑</a>
+			<a href="battle.html">バトル</a>
+		</nav>
+	</div></header>
+	<main class="wrap">
+		<div id="message" class="notice hidden" role="alert"></div>
+
+		<!-- 一覧 (id なし) -->
+		<section id="list-view" class="hidden">
+			<h1 class="page-title">ポケモン図鑑</h1>
+			<p class="lead">調べたいポケモンを選んでください。</p>
+			<div id="list"></div>
+		</section>
+
+		<div id="loading" class="loading">読み込み中...</div>
+
+		<!-- 詳細 (id あり) -->
+		<section id="detail-view" class="hidden">
+			<div class="dex-card">
+				<div class="dex-visual">
+					<img id="front-sprite" alt="">
+					<img id="back-sprite" alt="">
+				</div>
+				<div>
+					<div class="dex-no">No.<span id="no"></span></div>
+					<h1 class="dex-name" id="name"></h1>
+					<div class="chips" id="types"></div>
+					<div class="chips" id="abilities"></div>
+					<ul class="facts">
+						<li><span class="k">たかさ</span><span class="v"><span id="height"></span> m</span></li>
+						<li><span class="k">おもさ</span><span class="v"><span id="weight"></span> kg</span></li>
+						<li><span class="k">種族値の合計</span><span class="v" id="total"></span></li>
+					</ul>
+					<ul class="stat-list" id="stats"></ul>
+				</div>
+			</div>
+			<div class="pager">
+				<a class="btn" id="prev" href="#">← 前へ</a>
+				<a class="btn" href="pokedex.html">一覧へ</a>
+				<a class="btn" id="next" href="#">次へ →</a>
+			</div>
+			<div class="pager" style="justify-content:center">
+				<a class="btn primary" id="battle-link" href="battle.html">このポケモンでバトル</a>
+			</div>
+		</section>
+	</main>
 
 	<script src="js/translations.js"></script>
 	<script src="js/common.js"></script>
+	<script src="js/picker.js"></script>
 	<script src="js/pokedex.js"></script>
 </body>
 </html>

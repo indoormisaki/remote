@@ -173,6 +173,20 @@
 		});
 	}
 
+	var TYPE_CLASS = {
+		"ノーマル": "normal", "ほのお": "fire", "みず": "water", "でんき": "electric", "くさ": "grass",
+		"こおり": "ice", "かくとう": "fighting", "どく": "poison", "じめん": "ground", "ひこう": "flying",
+		"エスパー": "psychic", "むし": "bug", "いわ": "rock", "ゴースト": "ghost", "ドラゴン": "dragon",
+		"あく": "dark", "はがね": "steel", "フェアリー": "fairy"
+	};
+
+	function typeBadge(typeName) {
+		var span = document.createElement("span");
+		span.className = "type-badge t-" + (TYPE_CLASS[typeName] || "normal");
+		span.textContent = typeName;
+		return span;
+	}
+
 	function getParam(name) {
 		return new URLSearchParams(location.search).get(name);
 	}
@@ -201,6 +215,7 @@
 		toPokemonData: toPokemonData,
 		calcStats: calcStats,
 		pickMoves: pickMoves,
+		typeBadge: typeBadge,
 		getParam: getParam,
 		parseId: parseId,
 		showError: showError

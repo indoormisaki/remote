@@ -41,6 +41,7 @@
 			button.className = "move";
 			button.id = prefix + "-move-" + n;
 			button.textContent = move.name;
+			button.dataset.meta = move.type + "・威力" + move.power;
 			wrap.appendChild(button);
 			MOVE_FIELDS.forEach(function (f) {
 				var div = document.createElement("div");
@@ -62,32 +63,86 @@
 		});
 	}
 
-	var myId = Pokemon.parseId(Pokemon.getParam("my"));
-	var enemyId = Pokemon.parseId(Pokemon.getParam("enemy"));
-	if (myId === null || enemyId === null) {
-		document.getElementById("loading").classList.add("hidden");
-		Pokemon.showError(new Error("図鑑番号は1〜" + Pokemon.MAX_ID + "で指定してください"));
-		return;
+	function startBattle(myId, enemyId) {
+		document.getElementById("loading").classList.remove("hidden");
+		Promise.all([loadSide(myId), loadSide(enemyId)]).then(function (sides) {
+			var my = sides[0];
+			var enemy = sides[1];
+			document.title = my.data.name + " vs " + enemy.data.name + " | ポケモンバトル";
+			document.getElementById("myImg").src = my.data.backSprite || "";
+			document.getElementById("enemyImg").src = enemy.data.frontSprite || "";
+			fillSide("my", my.data, my.stats);
+			fillSide("enemy", enemy.data, enemy.stats);
+			fillMoves("my", my.moves, false);
+			fillMoves("enemy", enemy.moves, true);
+
+			document.getElementById("loading").classList.add("hidden");
+			document.getElementById("battle").classList.remove("hidden");
+			document.getElementById("rematch").addEventListener("click", function () {
+				location.reload();
+			});
+
+			var script = document.createElement("script");
+			script.src = "js/battle.js";
+			document.body.appendChild(script);
+		}).catch(function (err) {
+			document.getElementById("loading").classList.add("hidden");
+			Pokemon.showError(err);
+		});
 	}
 
-	Promise.all([loadSide(myId), loadSide(enemyId)]).then(function (sides) {
-		var my = sides[0];
-		var enemy = sides[1];
-		document.getElementById("myImg").src = my.data.backSprite || "";
-		document.getElementById("enemyImg").src = enemy.data.frontSprite || "";
-		fillSide("my", my.data, my.stats);
-		fillSide("enemy", enemy.data, enemy.stats);
-		fillMoves("my", my.moves, false);
-		fillMoves("enemy", enemy.moves, true);
+	// ポケモン選択画面
+	function showSelect(presetMy) {
+		var chosen = { my: presetMy, enemy: null };
+		var start = document.getElementById("start");
 
-		document.getElementById("loading").classList.add("hidden");
-		document.getElementById("battle").classList.remove("hidden");
+		function label(id) {
+			return id ? "No." + String(id).padStart(3, "0") + " " + Pokemon.translate(window.POKEMON_NAMES[id - 1]) : "未選択";
+		}
 
-		var script = document.createElement("script");
-		script.src = "js/battle.js";
-		document.body.appendChild(script);
-	}).catch(function (err) {
-		document.getElementById("loading").classList.add("hidden");
-		Pokemon.showError(err);
-	});
+		function update() {
+			document.getElementById("my-picked").textContent = label(chosen.my);
+			document.getElementById("enemy-picked").textContent = label(chosen.enemy);
+			start.disabled = !(chosen.my && chosen.enemy);
+		}
+
+		var myPicker = Pokemon.createPicker(document.getElementById("my-picker"), {
+			mode: "select",
+			onSelect: function (id) { chosen.my = id; update(); }
+		});
+		var enemyPicker = Pokemon.createPicker(document.getElementById("enemy-picker"), {
+			mode: "select",
+			onSelect: function (id) { chosen.enemy = id; update(); }
+		});
+		if (presetMy) {
+			myPicker.select(presetMy);
+		}
+
+		document.getElementById("random-enemy").addEventListener("click", function () {
+			chosen.enemy = 1 + Math.floor(Math.random() * Pokemon.MAX_ID);
+			enemyPicker.select(chosen.enemy);
+			update();
+		});
+		start.addEventListener("click", function () {
+			location.href = "battle.html?my=" + chosen.my + "&enemy=" + chosen.enemy;
+		});
+
+		update();
+		document.getElementById("select-view").classList.remove("hidden");
+	}
+
+	var myParam = Pokemon.getParam("my");
+	var enemyParam = Pokemon.getParam("enemy");
+	var myId = Pokemon.parseId(myParam);
+	var enemyId = Pokemon.parseId(enemyParam);
+
+	if (myParam === null && enemyParam === null) {
+		showSelect(null);
+	} else if (myId !== null && enemyParam === null) {
+		showSelect(myId);
+	} else if (myId === null || enemyId === null) {
+		Pokemon.showError(new Error("図鑑番号は1〜" + Pokemon.MAX_ID + "で指定してください"));
+	} else {
+		startBattle(myId, enemyId);
+	}
 })();

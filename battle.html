@@ -2,87 +2,127 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>pokemon battle</title>
-<link rel="stylesheet" type="text/css" href="css/battle.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>ポケモンバトル</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/battle.css">
 </head>
 <body>
-	<div id="message" class="hidden"></div>
-	<div id="loading">読み込み中...</div>
+	<header class="site-header"><div class="inner">
+		<a class="brand" href="index.html"><span class="ball" aria-hidden="true"></span><span>ポケモン図鑑＆バトル</span></a>
+		<nav class="site-nav" aria-label="メインメニュー">
+			<a href="index.html">ホーム</a>
+			<a href="pokedex.html">図鑑</a>
+			<a href="battle.html" aria-current="page">バトル</a>
+		</nav>
+	</div></header>
 
-	<div id="battle" class="hidden">
-		<div id="game-screen">
-			<img id="enemyImg" alt="">
+	<main class="wrap">
+		<div id="message" class="notice hidden" role="alert"></div>
+		<div id="loading" class="loading hidden">読み込み中...</div>
 
-			<div id="enemy-stats-window" class="stats-window">
-				<div id="enemy-name" class="pokemon-name"></div>
-				<div class="pokemon-level">Lv：<span id="enemy-pokemon-level"></span></div>
-				<div id="enemy-ailment-stats" class="aliment-stats"></div>
-				<div id="enemy-hp-frame" class="hp-frame">
-					<div id="enemy-hp-bar" class="hp-bar"></div>
-					<div id="enemy-hp-mark" class="mark"></div>
+		<!-- 対戦するポケモンを選ぶ -->
+		<section id="select-view" class="hidden">
+			<h1 class="page-title">バトル</h1>
+			<p class="lead">自分とあいてのポケモンを1匹ずつ選んでください。</p>
+			<div class="select-grid">
+				<section class="select-col" aria-labelledby="my-pick-title">
+					<h2 id="my-pick-title">あなたのポケモン <span class="picked" id="my-picked">未選択</span></h2>
+					<div id="my-picker"></div>
+				</section>
+				<section class="select-col" aria-labelledby="enemy-pick-title">
+					<h2 id="enemy-pick-title">あいてのポケモン <span class="picked" id="enemy-picked">未選択</span></h2>
+					<div class="row"><button type="button" class="btn" id="random-enemy">ランダムに選ぶ</button></div>
+					<div id="enemy-picker"></div>
+				</section>
+			</div>
+			<div class="start-bar">
+				<button type="button" class="btn primary" id="start" disabled>バトル開始</button>
+			</div>
+		</section>
+
+		<!-- バトル画面 (ID は battle.js が参照する) -->
+		<section id="battle" class="hidden">
+			<div id="game-screen">
+				<img id="enemyImg" alt="">
+
+				<div id="enemy-stats-window" class="stats-window">
+					<div class="stats-head">
+						<span id="enemy-name" class="pokemon-name"></span>
+						<span class="pokemon-level">Lv.<span id="enemy-pokemon-level"></span></span>
+					</div>
+					<div id="enemy-ailment-stats" class="aliment-stats"></div>
+					<div id="enemy-hp-frame" class="hp-frame">
+						<div id="enemy-hp-bar" class="hp-bar"></div>
+						<div id="enemy-hp-mark" class="mark"></div>
+					</div>
+					<div id="enemy-hp-value" class="hp-value hidden">
+						<span id="enemy-current-hp"></span>
+						<span> / </span>
+						<span id="enemy-max-hp"></span>
+					</div>
+					<div class="pokemon-stats hidden">
+						<div id="enemy-types"></div>
+						<div id="enemy-attack"></div>
+						<div id="enemy-defense"></div>
+						<div id="enemy-special-attack"></div>
+						<div id="enemy-special-defense"></div>
+						<div id="enemy-speed"></div>
+					</div>
 				</div>
 
-				<div id="enemy-hp-value" class="hidden">
-					<span id="enemy-current-hp"></span>
-					<span> / </span>
-					<span id="enemy-max-hp"></span>
-				</div>
-				<div class="pokemon-stats hidden">
-					<div id="enemy-types"></div>
-					<div id="enemy-attack"></div>
-					<div id="enemy-defense"></div>
-					<div id="enemy-special-attack"></div>
-					<div id="enemy-special-defense"></div>
-					<div id="enemy-speed"></div>
+				<img id="myImg" alt="">
+
+				<div id="my-stats-window" class="stats-window">
+					<div class="stats-head">
+						<span id="my-name" class="pokemon-name"></span>
+						<span class="pokemon-level">Lv.<span id="my-pokemon-level"></span></span>
+					</div>
+					<div id="my-ailment-stats" class="aliment-stats"></div>
+					<div id="my-hp-frame" class="hp-frame">
+						<div id="my-hp-bar" class="hp-bar"></div>
+						<div id="my-hp-mark" class="mark"></div>
+					</div>
+					<div id="my-hp-value" class="hp-value">
+						<span id="my-current-hp"></span>
+						<span> / </span>
+						<span id="my-max-hp"></span>
+					</div>
+					<div class="pokemon-stats hidden">
+						<div id="my-types"></div>
+						<div id="my-attack"></div>
+						<div id="my-defense"></div>
+						<div id="my-special-attack"></div>
+						<div id="my-special-defense"></div>
+						<div id="my-speed"></div>
+					</div>
 				</div>
 			</div>
 
-			<img id="myImg" alt="">
-
-			<div id="my-stats-window" class="stats-window">
-				<div id="my-name" class="pokemon-name"></div>
-				<div class="pokemon-level">Lv：<span id="my-pokemon-level"></span></div>
-				<div id="my-ailment-stats" class="aliment-stats"></div>
-				<div id="my-hp-frame" class="hp-frame">
-					<div id="my-hp-bar" class="hp-bar"></div>
-					<div id="my-hp-mark" class="mark"></div>
-				</div>
-
-				<div id="my-hp-value">
-					<span id="my-current-hp"></span>
-					<span> / </span>
-					<span id="my-max-hp"></span>
-				</div>
-				<div class="pokemon-stats hidden">
-					<div id="my-types"></div>
-					<div id="my-attack"></div>
-					<div id="my-defense"></div>
-					<div id="my-special-attack"></div>
-					<div id="my-special-defense"></div>
-					<div id="my-speed"></div>
-				</div>
+			<div id="message-window" aria-live="polite">
+				<span id="other-message"></span>
+				<span id="pokemon-name-message"></span><br>
+				<span id="move-message"></span><br>
+				<span id="effective-message"></span>
 			</div>
-		</div>
 
-		<div id="message-window">
-			<span id="other-message"></span>
-			<span id="pokemon-name-message"></span><br>
-			<span id="move-message"></span><br>
-			<span id="effective-message"></span>
-		</div>
+			<div class="command" id="my-commands"></div>
 
-		<div class="command" id="my-commands"></div>
+			<button id="reset" class="hidden">リセット</button>
 
-		<button id="reset" class="hidden">リセット</button>
+			<div class="command" id="enemy-commands"></div>
 
-		<div class="command" id="enemy-commands"></div>
-	</div>
-
-	<div><a href="index.html">もどる</a></div>
+			<div class="row after">
+				<a class="btn" href="battle.html">ポケモンを選びなおす</a>
+				<button type="button" class="btn" id="rematch">もう一度戦う</button>
+			</div>
+		</section>
+	</main>
 
 	<script src="js/translations.js"></script>
 	<script src="js/common.js"></script>
+	<script src="js/picker.js"></script>
 	<script src="js/jquery-3.6.4.min.js"></script>
 	<script src="js/battle-page.js"></script>
 </body>
