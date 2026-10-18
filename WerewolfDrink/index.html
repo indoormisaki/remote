@@ -105,19 +105,20 @@ const EFFECTS = {
 const DEFAULT_CARDS = [
   {emoji:"🐺",name:"人狼",count:2,effect:"self"},
   {emoji:"🧑‍🌾",name:"村人",count:8,effect:"none"},
-  {emoji:"🔮",name:"占い師",count:2,effect:"last"},
+  {emoji:"🔮",name:"占い師",count:2,effect:"pick"},
   {emoji:"🛡️",name:"騎士",count:2,effect:"guard"},
   {emoji:"👑",name:"村長",count:1,effect:"all"},
   {emoji:"🦊",name:"妖狐",count:1,effect:"fixed",target:"和田"},
   {emoji:"💘",name:"恋人",count:2,effect:"neighbor"},
-  {emoji:"🤪",name:"狂人",count:2,effect:"prev"}
+  {emoji:"🤪",name:"狂人",count:2,effect:"prev"},
+  {emoji:"👻",name:"霊媒師",count:1,effect:"last"}
 ];
 const $ = id => document.getElementById(id);
 const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
 
 let players = load("wd_players", []);
-let cards = load("wd_cards_v4", DEFAULT_CARDS);
+let cards = load("wd_cards_v5", DEFAULT_CARDS);
 let g = null; // ゲーム状態
 
 /* ---------- 設定画面 ---------- */
@@ -155,7 +156,7 @@ function renderCards(){
     const row = document.createElement("div"); row.className = "card-row";
     const mk = (val, key, extra={}) => {
       const el = document.createElement("input"); el.value = val; Object.assign(el, extra);
-      el.oninput = () => { cards[i][key] = key==="count" ? Math.max(0,parseInt(el.value)||0) : el.value; save("wd_cards_v4",cards); updateCount(); };
+      el.oninput = () => { cards[i][key] = key==="count" ? Math.max(0,parseInt(el.value)||0) : el.value; save("wd_cards_v5",cards); updateCount(); };
       return el;
     };
     const em = mk(c.emoji,"emoji"); em.className = "e";
@@ -163,13 +164,13 @@ function renderCards(){
     const sel = document.createElement("select");
     for (const k in EFFECTS){ const o = document.createElement("option"); o.value=k; o.textContent=EFFECTS[k]; sel.append(o); }
     sel.value = c.effect;
-    sel.onchange = () => { cards[i].effect = sel.value; if (sel.value === "fixed" && !cards[i].target) cards[i].target = "和田"; save("wd_cards_v4",cards); renderCards(); };
+    sel.onchange = () => { cards[i].effect = sel.value; if (sel.value === "fixed" && !cards[i].target) cards[i].target = "和田"; save("wd_cards_v5",cards); renderCards(); };
     const del = document.createElement("button"); del.className="small"; del.textContent="削除"; del.style.gridColumn="1/-1";
-    del.onclick = () => { cards.splice(i,1); save("wd_cards_v4",cards); renderCards(); };
+    del.onclick = () => { cards.splice(i,1); save("wd_cards_v5",cards); renderCards(); };
     row.append(sel);
     if (c.effect === "fixed"){
       const t = document.createElement("input"); t.value = c.target || ""; t.placeholder = "飲む人の名前"; t.maxLength = 12; t.style.gridColumn = "1/-1";
-      t.oninput = () => { cards[i].target = t.value; save("wd_cards_v4",cards); };
+      t.oninput = () => { cards[i].target = t.value; save("wd_cards_v5",cards); };
       row.append(t);
     }
     row.append(del); box.append(row);
@@ -181,8 +182,8 @@ function updateCount(){ $("deckCount").textContent = "合計 " + cards.reduce((s
 
 $("plusBtn").onclick = () => { if (players.length < MAX_P) { players.push(defaultName()); save("wd_players",players); renderPlayers(); } };
 $("minusBtn").onclick = () => { if (players.length > MIN_P) { players.pop(); save("wd_players",players); renderPlayers(); } };
-$("addCard").onclick = () => { cards.push({emoji:"🍺",name:"新カード",count:1,effect:"self"}); save("wd_cards_v4",cards); renderCards(); };
-$("resetCards").onclick = () => { if (confirm("カードを初期状態に戻しますか?")) { cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)); save("wd_cards_v4",cards); renderCards(); } };
+$("addCard").onclick = () => { cards.push({emoji:"🍺",name:"新カード",count:1,effect:"self"}); save("wd_cards_v5",cards); renderCards(); };
+$("resetCards").onclick = () => { if (confirm("カードを初期状態に戻しますか?")) { cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)); save("wd_cards_v5",cards); renderCards(); } };
 
 /* ---------- ゲーム ---------- */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
