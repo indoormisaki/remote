@@ -216,6 +216,7 @@
 		calcStats: calcStats,
 		pickMoves: pickMoves,
 		typeBadge: typeBadge,
+		typeClass: function (typeName) { return TYPE_CLASS[typeName] || null; },
 		getParam: getParam,
 		parseId: parseId,
 		showError: showError

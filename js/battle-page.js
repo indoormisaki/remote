@@ -42,6 +42,7 @@
 			button.id = prefix + "-move-" + n;
 			button.textContent = move.name;
 			button.dataset.meta = move.type + "・威力" + move.power;
+			button.dataset.initial = move.type.charAt(0);
 			wrap.appendChild(button);
 			MOVE_FIELDS.forEach(function (f) {
 				var div = document.createElement("div");
@@ -69,6 +70,11 @@
 			var my = sides[0];
 			var enemy = sides[1];
 			document.title = my.data.name + " vs " + enemy.data.name + " | ポケモンバトル";
+			var field = document.getElementById("game-screen");
+			var enemyType = Pokemon.typeClass(enemy.data.types[0]);
+			if (enemyType) {
+				field.style.setProperty("--field-tint", "var(--t-" + enemyType + ")");
+			}
 			document.getElementById("myImg").src = my.data.backSprite || "";
 			document.getElementById("enemyImg").src = enemy.data.frontSprite || "";
 			fillSide("my", my.data, my.stats);

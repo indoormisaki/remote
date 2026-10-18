@@ -13,20 +13,61 @@
 /* 対戦画面 */
 #battle { max-width: 640px; margin: 0 auto; }
 
+/* フィールド配色: あいてのタイプの色が空と地面にうっすら混ざる */
 #game-screen {
+	--tint: var(--field-tint, var(--t-normal));
+	--sky-a: color-mix(in srgb, var(--tint) 16%, #a9d4ff);
+	--sky-b: color-mix(in srgb, var(--tint) 7%, #eef7ff);
+	--grass-a: color-mix(in srgb, var(--tint) 16%, #c4e6a6);
+	--grass-b: color-mix(in srgb, var(--tint) 22%, #86c474);
+	--hill: color-mix(in srgb, var(--tint) 18%, #a7d38f);
+	--hill-far: color-mix(in srgb, var(--tint) 20%, #bcdcc4);
+	--cloud: rgba(255, 255, 255, .85);
+	--platform-top: color-mix(in srgb, var(--grass-b) 55%, #fff);
 	position: relative;
 	width: 100%;
 	aspect-ratio: 16 / 10;
 	border-radius: 16px;
 	border: 1px solid var(--line);
-	background: linear-gradient(var(--field-top) 0 58%, var(--field-bottom) 58%);
 	box-shadow: var(--shadow);
 	overflow: hidden;
+	background:
+		radial-gradient(ellipse 15% 7% at 18% 14%, var(--cloud) 0 62%, transparent 66%),
+		radial-gradient(ellipse 11% 5% at 26% 17%, var(--cloud) 0 62%, transparent 66%),
+		radial-gradient(ellipse 13% 6% at 62% 9%, var(--cloud) 0 62%, transparent 66%),
+		radial-gradient(ellipse 55% 20% at 18% 59%, var(--hill-far) 0 70%, transparent 72%),
+		radial-gradient(ellipse 50% 17% at 88% 58%, var(--hill) 0 70%, transparent 72%),
+		linear-gradient(var(--sky-a), var(--sky-b) 58%, var(--grass-a) 58%, var(--grass-b));
 }
+@media (prefers-color-scheme: dark) {
+	#game-screen {
+		--sky-a: color-mix(in srgb, var(--tint) 26%, #0f1d38);
+		--sky-b: color-mix(in srgb, var(--tint) 16%, #213a5c);
+		--grass-a: color-mix(in srgb, var(--tint) 12%, #21412c);
+		--grass-b: color-mix(in srgb, var(--tint) 14%, #162b1e);
+		--hill: color-mix(in srgb, var(--tint) 12%, #1d3a29);
+		--hill-far: color-mix(in srgb, var(--tint) 14%, #1a3347);
+		--cloud: rgba(180, 200, 235, .16);
+		--platform-top: color-mix(in srgb, var(--grass-b) 70%, #6ea77f);
+	}
+}
+/* ポケモンの足もとの台座 */
+#game-screen::before, #game-screen::after {
+	content: "";
+	position: absolute;
+	z-index: 0;
+	border-radius: 50%;
+	background: radial-gradient(ellipse at 50% 35%, var(--platform-top), var(--grass-b) 75%);
+	box-shadow: 0 5px 0 rgba(0, 0, 0, .14);
+}
+#game-screen::before { top: 38%; right: 5%; width: 38%; height: 15%; }
+#game-screen::after { bottom: -5%; left: 2%; width: 46%; height: 19%; }
+#myImg, #enemyImg, .stats-window { z-index: 1; }
 #myImg, #enemyImg {
 	position: absolute;
 	width: 28%;
 	image-rendering: pixelated;
+	filter: drop-shadow(0 4px 3px rgba(0, 0, 0, .2));
 }
 #myImg { bottom: 2%; left: 8%; width: 34%; }
 #enemyImg { top: 6%; right: 10%; }
@@ -80,47 +121,68 @@
 	line-height: 1.7;
 }
 
-/* 技ボタン */
+/* 技ボタン: 左にタイプの頭文字、右に技名とタイプ・威力 */
+.command-title { margin: 0 0 8px; font-size: .85rem; font-weight: 700; letter-spacing: .08em; color: var(--muted); }
 .command { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 #enemy-commands { display: none; }
 .move {
-	display: flex;
-	flex-direction: column;
+	--c: var(--t-normal);
+	--on: #fff;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-template-rows: auto auto;
+	align-content: center;
 	align-items: center;
-	justify-content: center;
+	column-gap: 10px;
 	width: 100%;
-	min-height: 60px;
-	padding: 8px 10px;
+	min-height: 64px;
+	padding: 8px 14px 8px 10px;
 	border-radius: 14px;
-	border: none;
-	background: var(--t-normal);
-	color: #fff;
+	border: 1px solid color-mix(in srgb, var(--c) 70%, #000);
+	background: linear-gradient(color-mix(in srgb, var(--c) 88%, #fff), var(--c));
+	box-shadow: 0 3px 0 color-mix(in srgb, var(--c) 62%, #000);
+	color: var(--on);
 	font: inherit;
 	font-weight: 700;
+	text-align: left;
+	line-height: 1.25;
 	cursor: pointer;
-	transition: transform .1s ease, filter .15s ease;
+	transition: transform .08s ease, box-shadow .08s ease, filter .15s ease;
 }
-.move:hover { filter: brightness(1.08); }
-.move:active { transform: scale(.98); }
-.move::after { content: attr(data-meta); font-size: .75rem; font-weight: 500; opacity: .9; }
-.move.normal { background: var(--t-normal); }
-.move.fire { background: var(--t-fire); }
-.move.water { background: var(--t-water); }
-.move.electric { background: var(--t-electric); color: #1b1b1b; }
-.move.grass { background: var(--t-grass); }
-.move.ice { background: var(--t-ice); color: #10282b; }
-.move.fighting { background: var(--t-fighting); }
-.move.poison { background: var(--t-poison); }
-.move.ground { background: var(--t-ground); }
-.move.flying { background: var(--t-flying); }
-.move.psychic { background: var(--t-psychic); }
-.move.bug { background: var(--t-bug); }
-.move.rock { background: var(--t-rock); }
-.move.ghost { background: var(--t-ghost); }
-.move.dragon { background: var(--t-dragon); }
-.move.dark { background: var(--t-dark); }
-.move.steel { background: var(--t-steel); }
-.move.fairy { background: var(--t-fairy); }
+.move::before {
+	content: attr(data-initial);
+	grid-row: 1 / span 2;
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .92);
+	color: color-mix(in srgb, var(--c) 78%, #000);
+	font-size: .85rem;
+	font-weight: 800;
+}
+.move::after { content: attr(data-meta); grid-column: 2; font-size: .75rem; font-weight: 500; opacity: .92; }
+.move:hover { filter: brightness(1.07); }
+.move:active { transform: translateY(2px); box-shadow: 0 1px 0 color-mix(in srgb, var(--c) 62%, #000); }
+.move.normal { --c: var(--t-normal); }
+.move.fire { --c: var(--t-fire); }
+.move.water { --c: var(--t-water); }
+.move.electric { --c: var(--t-electric); --on: #1b1b1b; }
+.move.grass { --c: var(--t-grass); }
+.move.ice { --c: var(--t-ice); --on: #10282b; }
+.move.fighting { --c: var(--t-fighting); }
+.move.poison { --c: var(--t-poison); }
+.move.ground { --c: var(--t-ground); }
+.move.flying { --c: var(--t-flying); }
+.move.psychic { --c: var(--t-psychic); }
+.move.bug { --c: var(--t-bug); }
+.move.rock { --c: var(--t-rock); }
+.move.ghost { --c: var(--t-ghost); }
+.move.dragon { --c: var(--t-dragon); }
+.move.dark { --c: var(--t-dark); }
+.move.steel { --c: var(--t-steel); }
+.move.fairy { --c: var(--t-fairy); }
 
 .row.after { margin-top: 20px; justify-content: center; }
 
