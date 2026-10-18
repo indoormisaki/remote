@@ -153,18 +153,18 @@ function turn(myMoveNum) {
 	let enemyMovePower = parseInt(document.getElementById("enemy-power-" + enemyMoveNum).textContent);	// 技の威力を取得
 	let enemyMoveType = document.getElementById("enemy-type-" + enemyMoveNum).textContent;	// 技のタイプを取得
 	let enemyDamageClass = document.getElementById("enemy-damage-class-" + enemyMoveNum).textContent;	// 技の分類を取得
-	let enemyAccuracy = parseInt(document.getElementById("enemy-accuracy-" + myMoveNum).textContent);	// 技の命中率を取得
+	let enemyAccuracy = parseInt(document.getElementById("enemy-accuracy-" + enemyMoveNum).textContent);	// 技の命中率を取得
 	let enemyMinHits = parseInt(document.getElementById("enemy-min-hits-" + enemyMoveNum).textContent);	// 技の最低ヒット数を取得
 	let enemyMaxHits = parseInt(document.getElementById("enemy-max-hits-" + enemyMoveNum).textContent);	// 技の最高ヒット数を取得
 	let enemyDrain = parseInt(document.getElementById("enemy-drain-" + enemyMoveNum).textContent);	//	ダメージ吸収率を取得
 	let enemyAilment = document.getElementById("enemy-ailment-" + enemyMoveNum).textContent;	//	与え得る状態異常の名前
 	let enemyAilmentChance = parseInt(document.getElementById("enemy-ailment-chance-" + enemyMoveNum).textContent);	//	状態異常付与確率
 	// 一撃必殺技かどうかを判定
-	if (document.getElementById("my-move-" + myMoveNum).textContent == "じわれ"
-		|| document.getElementById("my-move-" + myMoveNum).textContent == "つのドリル"
-			|| document.getElementById("my-move-" + myMoveNum).textContent == "ぜったいれいど"
-				|| document.getElementById("my-move-" + myMoveNum).textContent == "ハサミギロチン") {
-		eneyDamageClass = "oneHitKnockout";
+	if (document.getElementById("enemy-move-" + enemyMoveNum).textContent == "じわれ"
+		|| document.getElementById("enemy-move-" + enemyMoveNum).textContent == "つのドリル"
+			|| document.getElementById("enemy-move-" + enemyMoveNum).textContent == "ぜったいれいど"
+				|| document.getElementById("enemy-move-" + enemyMoveNum).textContent == "ハサミギロチン") {
+		enemyDamageClass = "oneHitKnockout";
 	}
 
 	//	すばやさ判定
@@ -219,7 +219,8 @@ function action(name, moveNum, accuracy, movePower, moveType, damageClass, drain
 	let ailmentRandomNumber = Math.floor(Math.random() * 100) + 1;
 	setTimeout(function(){
 		if (accuracyRandomNumber <= accuracy) {
-			for (let i = 0; i < getHits(minHits, maxHits); i++) {
+			let hits = getHits(minHits, maxHits);
+			for (let i = 0; i < hits; i++) {
 				let damage = calcDamage(movePower, moveType, damageClass, drain, attackSide);
 				// HP変更処理を実行
 				if (attackSide == "my") {
@@ -342,7 +343,8 @@ function calcDamage(movePower, moveType, damageClass, drain, attackSide) {
 		damage = 0;
 	}
 	// タイプ一致の場合1.5倍に
-	if (myTypesArray.includes(moveType)) {
+	let attackerTypesArray = (attackSide == "my") ? myTypesArray : enemyTypesArray;
+	if (attackerTypesArray.includes(moveType)) {
 		damage *= 1.5;
 	}
 
@@ -523,23 +525,22 @@ function slipDamage(ailment, defenseSide) {
 function alterHp(damage, currentHp, maxHp, hpBar, attackSide) {
 	// HPの値を算出する
 	currentHp -= damage;
-	let hpRatio = (currentHp / maxHp) * 100
-
-	if (currentHp <= 0) {
-		// 算出の結果 0 以下になった場合
+	if (currentHp < 0) {
 		currentHp = 0;
-		hpBar.style.width = "0%";
-	} else if (hpRatio > 100){		// 算出の結果 100 を超過した場合
+	} else if (currentHp > maxHp) {
 		currentHp = maxHp;
-	} else if (hpRatio > 50) {
+	}
+	let hpRatio = (currentHp / maxHp) * 100;
+
+	if (hpRatio > 50) {
 		hpBar.style.backgroundColor = "#00FF00";
-	} else if (hpRatio <= 50 && hpRatio > 20) {
+	} else if (hpRatio > 20) {
 		hpBar.style.backgroundColor = "#FFFF00";
-	} else if (hpRatio <= 20) {
+	} else {
 		hpBar.style.backgroundColor = "#FF0000";
 	}
 	// HPゲージを更新する
-	hpBar.style.width = hpRatio + "%"
+	hpBar.style.width = hpRatio + "%";
 
 	// HP更新、戦闘不能判定
 	if (attackSide == "my") {
