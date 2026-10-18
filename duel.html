@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>2人対戦</title>
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/battle.css">
+</head>
+<body>
+	<header class="site-header"><div class="inner">
+		<a class="brand" href="index.html"><span class="ball" aria-hidden="true"></span><span>ポケモン図鑑＆バトル</span></a>
+		<nav class="site-nav" aria-label="メインメニュー">
+			<a href="index.html">ホーム</a>
+			<a href="pokedex.html">図鑑</a>
+			<a href="battle.html">バトル</a>
+			<a href="duel.html" aria-current="page">2人対戦</a>
+		</nav>
+	</div></header>
+
+	<main class="wrap">
+		<!-- 相手に見えないよう、選ぶ前に画面を渡してもらう -->
+		<section id="step-cover" class="hidden">
+			<div class="duel-cover">
+				<p id="cover-text"></p>
+				<p class="sub">選んだポケモンは相手に見せません。ほかの人は画面を見ないでください。</p>
+				<button type="button" class="btn primary" id="cover-ok"></button>
+			</div>
+		</section>
+
+		<section id="step-pick">
+			<h1 class="page-title" id="pick-title"></h1>
+			<p class="lead" id="pick-lead"></p>
+			<p class="picked-line">えらんだポケモン: <span class="picked" id="picked">未選択</span></p>
+			<div id="picker"></div>
+			<div class="start-bar">
+				<button type="button" class="btn primary" id="decide" disabled>決定</button>
+			</div>
+		</section>
+	</main>
+
+	<script src="js/translations.js"></script>
+	<script src="js/common.js"></script>
+	<script src="js/picker.js"></script>
+	<script src="js/duel.js"></script>
+</body>
+</html>

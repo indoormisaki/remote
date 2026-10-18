@@ -172,7 +172,7 @@
 			again.type = "button";
 			again.addEventListener("click", function () { location.reload(); });
 			var pick = text("a", "btn", "ポケモンを選びなおす");
-			pick.href = "battle.html";
+			pick.href = "duel.html";
 			row.appendChild(again);
 			row.appendChild(pick);
 			box.appendChild(row);
@@ -229,22 +229,6 @@
 			return id ? "No." + String(id).padStart(3, "0") + " " + Pokemon.translate(window.POKEMON_NAMES[id - 1]) : "未選択";
 		}
 
-		var modeInputs = document.querySelectorAll("input[name=mode]");
-		function mode() {
-			return document.querySelector("input[name=mode]:checked").value;
-		}
-		function applyMode() {
-			var two = mode() === "2p";
-			document.getElementById("my-pick-label").textContent = two ? "プレイヤー1のポケモン" : "あなたのポケモン";
-			document.getElementById("enemy-pick-label").textContent = two ? "プレイヤー2のポケモン" : "あいてのポケモン";
-			document.getElementById("select-lead").textContent = two
-				? "2人で1台の画面を交代しながら遊びます。それぞれのポケモンを選んでください。"
-				: "自分とあいてのポケモンを1匹ずつ選んでください。";
-		}
-		for (var m = 0; m < modeInputs.length; m++) {
-			modeInputs[m].addEventListener("change", applyMode);
-		}
-
 		function update() {
 			document.getElementById("my-picked").textContent = label(chosen.my);
 			document.getElementById("enemy-picked").textContent = label(chosen.enemy);
@@ -269,25 +253,36 @@
 			update();
 		});
 		start.addEventListener("click", function () {
-			location.href = "battle.html?my=" + chosen.my + "&enemy=" + chosen.enemy + (mode() === "2p" ? "&mode=2p" : "");
+			location.href = "battle.html?my=" + chosen.my + "&enemy=" + chosen.enemy;
 		});
 
 		update();
 		document.getElementById("select-view").classList.remove("hidden");
 	}
 
+	var duel = Pokemon.getParam("mode") === "2p";
 	var myParam = Pokemon.getParam("my");
 	var enemyParam = Pokemon.getParam("enemy");
 	var myId = Pokemon.parseId(myParam);
 	var enemyId = Pokemon.parseId(enemyParam);
 
-	if (myParam === null && enemyParam === null) {
+	if (duel) {
+		// 2人対戦: 選んだポケモンは2人対戦の選択画面から受け取る
+		document.querySelector('.site-nav a[aria-current]').removeAttribute("aria-current");
+		document.querySelector('.site-nav a[href="duel.html"]').setAttribute("aria-current", "page");
+		var picks = Pokemon.loadDuel() || (myId !== null && enemyId !== null ? { my: myId, enemy: enemyId } : null);
+		if (picks) {
+			startBattle(picks.my, picks.enemy, true);
+		} else {
+			location.replace("duel.html");
+		}
+	} else if (myParam === null && enemyParam === null) {
 		showSelect(null);
 	} else if (myId !== null && enemyParam === null) {
 		showSelect(myId);
 	} else if (myId === null || enemyId === null) {
 		Pokemon.showError(new Error("図鑑番号は1〜" + Pokemon.MAX_ID + "で指定してください"));
 	} else {
-		startBattle(myId, enemyId, Pokemon.getParam("mode") === "2p");
+		startBattle(myId, enemyId, false);
 	}
 })();

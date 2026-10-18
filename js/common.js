@@ -187,6 +187,27 @@
 		return span;
 	}
 
+	// 2人対戦で選んだポケモンの受け渡し (URLに残さないため sessionStorage を使う)
+	function saveDuel(my, enemy) {
+		try {
+			sessionStorage.setItem("pokemon-duel", JSON.stringify({ my: my, enemy: enemy }));
+			return true;
+		} catch (e) {
+			return false;
+		}
+	}
+
+	function loadDuel() {
+		try {
+			var v = JSON.parse(sessionStorage.getItem("pokemon-duel"));
+			var my = v && parseId(v.my);
+			var enemy = v && parseId(v.enemy);
+			return my && enemy ? { my: my, enemy: enemy } : null;
+		} catch (e) {
+			return null;
+		}
+	}
+
 	function getParam(name) {
 		return new URLSearchParams(location.search).get(name);
 	}
@@ -217,6 +238,8 @@
 		pickMoves: pickMoves,
 		typeBadge: typeBadge,
 		typeClass: function (typeName) { return TYPE_CLASS[typeName] || null; },
+		saveDuel: saveDuel,
+		loadDuel: loadDuel,
 		getParam: getParam,
 		parseId: parseId,
 		showError: showError
