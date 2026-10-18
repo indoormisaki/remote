@@ -128,7 +128,8 @@ $("#my-move-4").click(function() {
 });
 
 // *** ターン処理 ***
-function turn(myMoveNum) {
+// forcedEnemyMoveNum: 2人対戦でプレイヤー2が選んだ技の番号 (省略時はコンピューターがランダムに選ぶ)
+function turn(myMoveNum, forcedEnemyMoveNum) {
 
 	// 自分の技情報
 	let myMovePower = parseInt(document.getElementById("my-power-" + myMoveNum).textContent);	// 技の威力を取得
@@ -149,7 +150,7 @@ function turn(myMoveNum) {
 	}
 
 	// 敵の技情報
-	let enemyMoveNum = Math.floor(Math.random() * 4) + 1;
+	let enemyMoveNum = forcedEnemyMoveNum || (Math.floor(Math.random() * 4) + 1);
 	let enemyMovePower = parseInt(document.getElementById("enemy-power-" + enemyMoveNum).textContent);	// 技の威力を取得
 	let enemyMoveType = document.getElementById("enemy-type-" + enemyMoveNum).textContent;	// 技のタイプを取得
 	let enemyDamageClass = document.getElementById("enemy-damage-class-" + enemyMoveNum).textContent;	// 技の分類を取得
@@ -549,7 +550,7 @@ function alterHp(damage, currentHp, maxHp, hpBar, attackSide) {
 		if (enemyCurrentHp == 0) {
 			setTimeout(function(){
 				resetMessage();
-				document.getElementById("other-message").textContent = "あいての　" + enemyName + "は　たおれた";
+				document.getElementById("other-message").textContent = (window.enemyLabel || "あいての") + "　" + enemyName + "は　たおれた";
 				document.getElementById("enemyImg").classList.add("knockout");
 			}, 2000);
 			isAvailable = false;
@@ -566,7 +567,7 @@ function alterHp(damage, currentHp, maxHp, hpBar, attackSide) {
 		if (myCurrentHp == 0) {
 			setTimeout(function(){
 				resetMessage();
-				document.getElementById("other-message").textContent = myName + "は　たおれた";
+				document.getElementById("other-message").textContent = (window.myLabel || "") + myName + "は　たおれた";
 				document.getElementById("myImg").classList.add("knockout");
 			}, 2000);
 			isAvailable = false;

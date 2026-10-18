@@ -25,14 +25,19 @@
 		<!-- 対戦するポケモンを選ぶ -->
 		<section id="select-view" class="hidden">
 			<h1 class="page-title">バトル</h1>
-			<p class="lead">自分とあいてのポケモンを1匹ずつ選んでください。</p>
+			<p class="lead" id="select-lead">自分とあいてのポケモンを1匹ずつ選んでください。</p>
+			<fieldset class="mode-switch">
+				<legend>対戦のしかた</legend>
+				<label><input type="radio" name="mode" value="cpu" checked> コンピューターと対戦</label>
+				<label><input type="radio" name="mode" value="2p"> 2人で対戦（交代で技を選ぶ）</label>
+			</fieldset>
 			<div class="select-grid">
 				<section class="select-col" aria-labelledby="my-pick-title">
-					<h2 id="my-pick-title">あなたのポケモン <span class="picked" id="my-picked">未選択</span></h2>
+					<h2 id="my-pick-title"><span id="my-pick-label">あなたのポケモン</span> <span class="picked" id="my-picked">未選択</span></h2>
 					<div id="my-picker"></div>
 				</section>
 				<section class="select-col" aria-labelledby="enemy-pick-title">
-					<h2 id="enemy-pick-title">あいてのポケモン <span class="picked" id="enemy-picked">未選択</span></h2>
+					<h2 id="enemy-pick-title"><span id="enemy-pick-label">あいてのポケモン</span> <span class="picked" id="enemy-picked">未選択</span></h2>
 					<div class="row"><button type="button" class="btn" id="random-enemy">ランダムに選ぶ</button></div>
 					<div id="enemy-picker"></div>
 				</section>
@@ -109,6 +114,12 @@
 
 			<h2 class="command-title">わざをえらぶ</h2>
 			<div class="command" id="my-commands"></div>
+
+			<!-- 2人対戦: 技を選ぶプレイヤーを交代する -->
+			<section id="duel-panel" class="duel hidden" aria-live="polite">
+				<h2 class="command-title" id="duel-title"></h2>
+				<div id="duel-body"></div>
+			</section>
 
 			<button id="reset" class="hidden">リセット</button>
 
