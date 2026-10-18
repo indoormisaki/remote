@@ -73,33 +73,22 @@ input,select{font:inherit;color:var(--text);background:#1b1230;border:1px solid 
 </main>
 
 <script>
-// shortText: 結果の大見出し / label: 編集画面の選択肢
-const EFFECTS = {
-  self:    {label:"めくった人が飲む",               text:()=>"めくった人が飲む!", drink:true},
-  none:    {label:"セーフ(誰も飲まない)",           text:()=>"セーフ!", drink:false},
-  pick:    {label:"めくった人が指名→指名された人が飲む", text:()=>"めくった人が、飲ませる人を1人指名!", drink:true},
-  guard:   {label:"次にめくる人の「飲む」を肩代わり", text:()=>"次にめくる人の分を、めくった人が肩代わり!", drink:false},
-  all:     {label:"全員で乾杯(全員が飲む)",         text:()=>"全員で乾杯!", drink:true},
-  last:    {label:"一番最近飲んだ人がもう一度飲む",   text:()=>"さっき飲んだ人がもう一度飲む!", drink:true},
-  text:    {label:"決まった文章を表示(自由入力)",   text:c=>(c.text||"").trim()||"(文章が未入力です)", drink:true, plain:true},
-  prev:    {label:"ひとつ前にめくった人が飲む",       text:()=>"ひとつ前にめくった人が飲む!", drink:true},
-  neighbor:{label:"めくった人と隣の人が一緒に飲む",   text:()=>"めくった人と隣の人が飲む!", drink:true}
-};
+// rule: 結果に表示する文章(自由に編集可) / drink: true=飲む(赤)、false=セーフ(緑)
 const DEFAULT_CARDS = [
-  {emoji:"🐺",name:"人狼",count:2,effect:"self"},
-  {emoji:"🧑‍🌾",name:"村人",count:8,effect:"none"},
-  {emoji:"🔮",name:"占い師",count:2,effect:"pick"},
-  {emoji:"🛡️",name:"騎士",count:2,effect:"guard"},
-  {emoji:"👑",name:"村長",count:1,effect:"all"},
-  {emoji:"🦊",name:"妖狐",count:1,effect:"text",text:"和田さんが飲む"},
-  {emoji:"💘",name:"恋人",count:2,effect:"neighbor"},
-  {emoji:"🤪",name:"狂人",count:2,effect:"prev"},
-  {emoji:"👻",name:"霊媒師",count:1,effect:"last"}
+  {emoji:"🐺",name:"人狼",count:2,rule:"めくった人が飲む",drink:true},
+  {emoji:"🧑‍🌾",name:"村人",count:8,rule:"セーフ",drink:false},
+  {emoji:"🔮",name:"占い師",count:2,rule:"次に飲む人を推理する",drink:true},
+  {emoji:"🛡️",name:"騎士",count:2,rule:"次にめくる人の分を肩代わり",drink:false},
+  {emoji:"👑",name:"村長",count:1,rule:"全員で乾杯",drink:true},
+  {emoji:"🦊",name:"妖狐",count:1,rule:"和田さんが飲む",drink:true},
+  {emoji:"💘",name:"恋人",count:2,rule:"めくった人と隣の人が飲む",drink:true},
+  {emoji:"🤪",name:"狂人",count:2,rule:"ひとつ前にめくった人が飲む",drink:true},
+  {emoji:"👻",name:"霊媒師",count:1,rule:"さっき飲んだ人がもう一度飲む",drink:true}
 ];
 const $ = id => document.getElementById(id);
 const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-const KEY = "wd_cards_v7";
+const KEY = "wd_cards_v8";
 let cards = load(KEY, DEFAULT_CARDS);
 let g = null; // ゲーム状態
 
@@ -115,26 +104,22 @@ function renderCards(){
     };
     const em = mk(c.emoji,"emoji"); em.className = "e";
     row.append(em, mk(c.name,"name",{placeholder:"役職名"}), mk(c.count,"count",{type:"number",min:0,inputMode:"numeric"}));
+    const rule = mk(c.rule || "","rule",{placeholder:"ルール(めくったときに表示する文章)",maxLength:60});
+    rule.style.gridColumn = "1/-1"; row.append(rule);
     const sel = document.createElement("select");
-    for (const k in EFFECTS){ const o = document.createElement("option"); o.value=k; o.textContent=EFFECTS[k].label; sel.append(o); }
-    sel.value = c.effect;
-    sel.onchange = () => { cards[i].effect = sel.value; if (sel.value === "text" && !cards[i].text) cards[i].text = "和田さんが飲む"; save(KEY,cards); renderCards(); };
-    row.append(sel);
-    if (c.effect === "text"){
-      const t = document.createElement("input"); t.value = c.text || ""; t.placeholder = "表示する文章"; t.maxLength = 40; t.style.gridColumn = "1/-1";
-      t.oninput = () => { cards[i].text = t.value; save(KEY,cards); };
-      row.append(t);
-    }
+    [["true","🍻 飲む(赤で表示)"],["false","✅ セーフ(緑で表示)"]].forEach(([v,t]) => { const o = document.createElement("option"); o.value=v; o.textContent=t; sel.append(o); });
+    sel.value = String(!!c.drink);
+    sel.onchange = () => { cards[i].drink = sel.value === "true"; save(KEY,cards); };
     const del = document.createElement("button"); del.className="small"; del.textContent="削除"; del.style.gridColumn="1/-1";
     del.onclick = () => { cards.splice(i,1); save(KEY,cards); renderCards(); };
-    row.append(del); box.append(row);
+    row.append(sel, del); box.append(row);
     if (i < cards.length-1){ const hr=document.createElement("hr"); hr.style.cssText="border:0;border-top:1px solid #ffffff18;margin:10px 0"; box.append(hr); }
   });
   updateCount();
 }
 function updateCount(){ $("deckCount").textContent = "合計 " + cards.reduce((s,c)=>s+c.count,0) + " 枚"; }
 
-$("addCard").onclick = () => { cards.push({emoji:"🍺",name:"新カード",count:1,effect:"self"}); save(KEY,cards); renderCards(); };
+$("addCard").onclick = () => { cards.push({emoji:"🍺",name:"新カード",count:1,rule:"めくった人が飲む",drink:true}); save(KEY,cards); renderCards(); };
 $("resetCards").onclick = () => { if (confirm("カードを初期状態に戻しますか?")) { cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)); save(KEY,cards); renderCards(); } };
 
 /* ---------- ゲーム ---------- */
@@ -146,7 +131,7 @@ function start(){
   const deck = [];
   cards.forEach(c => { for(let i=0;i<c.count;i++) deck.push(c); });
   if (!deck.length) { alert("山札が空です。枚数を設定してください"); return; }
-  g = { deck: shuffle(deck), flips: 0, anyDrank: false, guard: false };
+  g = { deck: shuffle(deck), flips: 0 };
   $("setup").classList.add("hidden"); $("game").classList.remove("hidden");
   $("log").innerHTML = ""; $("result").classList.add("hidden");
   showBack(); updateRemain();
@@ -163,30 +148,18 @@ function updateRemain(){
 
 $("flipBtn").onclick = () => {
   if (!g.deck.length) { start(); return; }
-  const c = g.deck.shift(), ef = EFFECTS[c.effect] || EFFECTS.none;
+  const c = g.deck.shift();
+  const text = (c.rule || "").trim() || "(ルール未入力)";
   showFace(c);
-  let text = ef.text(c), note = "";
-
-  // 前のカードが騎士なら、めくった人の分を肩代わり
-  const guarded = g.guard && c.effect !== "guard";
-  if (guarded){
-    if (["self","neighbor","all"].includes(c.effect)) note = "🛡️ めくった人の分は、騎士の人が肩代わり";
-    g.guard = false;
-  }
-  if (c.effect === "guard") g.guard = true;
-
-  if (c.effect === "prev" && g.flips === 0) { text = "最初なので、めくった人が飲む!"; }
-  if (c.effect === "last" && !g.anyDrank) { text = "まだ誰も飲んでいないので、めくった人が飲む!"; }
-  if (ef.drink) g.anyDrank = true;
 
   const r = $("result");
-  r.classList.remove("hidden"); r.classList.toggle("safe", !ef.drink);
-  r.innerHTML = (ef.drink && !ef.plain ? "🍻 " : "") + esc(text) + (note ? `<small>${esc(note)}</small>` : "");
-  if (navigator.vibrate) navigator.vibrate(ef.drink ? [120,60,120] : 40);
+  r.classList.remove("hidden"); r.classList.toggle("safe", !c.drink);
+  r.textContent = text;
+  if (navigator.vibrate) navigator.vibrate(c.drink ? [120,60,120] : 40);
 
   g.flips++;
   const li = document.createElement("div");
-  li.textContent = `${g.flips}枚目:${c.emoji}${c.name} → ${text}${note ? "(" + note + ")" : ""}`;
+  li.textContent = `${g.flips}枚目:${c.emoji}${c.name} → ${text}`;
   $("log").prepend(li);
   updateRemain();
 };
