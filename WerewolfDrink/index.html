@@ -19,14 +19,11 @@ h1{font-size:22px;margin:4px 0 16px;text-align:center}
 h2{font-size:16px;margin:20px 0 8px;color:var(--sub)}
 .panel{background:var(--panel);border-radius:14px;padding:14px;margin-bottom:12px}
 button{font:inherit;color:var(--text);background:#41306e;border:0;border-radius:12px;padding:12px 16px;cursor:pointer}
+button:disabled{opacity:.5}
 button.primary{background:var(--accent);color:#fff;font-weight:700;width:100%;padding:16px;font-size:18px}
 button.small{padding:6px 10px;font-size:13px}
 input,select{font:inherit;color:var(--text);background:#1b1230;border:1px solid #4b3a7e;border-radius:10px;padding:10px;min-width:0}
 .row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.row input{flex:1}
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{background:#41306e;border-radius:99px;padding:6px 12px;display:flex;gap:8px;align-items:center}
-.chip b{cursor:pointer;color:var(--sub)}
 .card-row{display:grid;grid-template-columns:44px 1fr 56px;gap:6px;margin-bottom:6px}
 .card-row select{grid-column:1/-1}
 .card-row .e{text-align:center;padding:10px 0}
@@ -38,12 +35,9 @@ input,select{font:inherit;color:var(--text);background:#1b1230;border:1px solid 
 .face .em{font-size:84px;line-height:1}
 .face .nm{font-size:24px;font-weight:700;margin-top:8px}
 @keyframes flip{from{transform:rotateY(90deg)}to{transform:rotateY(0)}}
-.turn{text-align:center;color:var(--sub)}
-.turn b{color:var(--text);font-size:20px}
 .result{background:var(--accent);color:#fff;border-radius:14px;padding:14px;text-align:center;font-size:22px;font-weight:800;margin:8px 0;min-height:64px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px}
 .result small{font-size:13px;font-weight:400;opacity:.9}
 .result.safe{background:var(--ok);color:#073}
-.pick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0}
 .log{font-size:13px;color:var(--sub);max-height:140px;overflow:auto}
 .log div{padding:3px 0;border-bottom:1px solid #ffffff12}
 .status{text-align:center;color:var(--sub);font-size:13px;margin:6px 0}
@@ -55,17 +49,6 @@ input,select{font:inherit;color:var(--text);background:#1b1230;border:1px solid 
 
 <!-- 設定画面 -->
 <section id="setup">
-  <h2>参加人数(めくる順)</h2>
-  <div class="panel">
-    <div class="row" style="justify-content:center;gap:20px">
-      <button id="minusBtn" style="width:56px;font-size:22px">−</button>
-      <div style="font-size:28px;font-weight:700;min-width:80px;text-align:center"><span id="countNum"></span>人</div>
-      <button id="plusBtn" style="width:56px;font-size:22px">＋</button>
-    </div>
-    <div class="chips" id="players" style="justify-content:center"></div>
-    <div class="status">名前を変えたいときは、名前をタップ(そのままでもOK)</div>
-  </div>
-
   <h2>山札(カード)</h2>
   <div class="panel" id="cardEdit"></div>
   <div class="row">
@@ -79,28 +62,28 @@ input,select{font:inherit;color:var(--text);background:#1b1230;border:1px solid 
 
 <!-- ゲーム画面 -->
 <section id="game" class="hidden">
-  <div class="turn">次にめくる人<br><b id="turnName"></b></div>
   <div class="deck" id="deck"></div>
   <div class="status" id="remain"></div>
   <div class="result safe hidden" id="result"></div>
-  <div class="pick hidden" id="pickArea"></div>
   <button class="primary" id="flipBtn">山札をめくる</button>
   <div class="row" style="margin-top:12px"><button class="small" id="backBtn">設定に戻る</button><button class="small" id="restartBtn">最初からやり直す</button></div>
   <h2>ログ</h2>
   <div class="panel log" id="log"></div>
 </section>
 </main>
+
 <script>
+// shortText: 結果の大見出し / label: 編集画面の選択肢
 const EFFECTS = {
-  self:"めくった本人が飲む",
-  none:"セーフ(誰も飲まない)",
-  pick:"めくった人が指名→指名された人が飲む",
-  guard:"次にめくる人の「飲む」を肩代わり",
-  all:"全員で乾杯(全員が飲む)",
-  last:"一番最近飲んだ人がもう一度飲む",
-  fixed:"決まった人が飲む(名前を指定)",
-  prev:"ひとつ前にめくった人が飲む",
-  neighbor:"めくった人と次の人が一緒に飲む"
+  self:    {label:"めくった人が飲む",               text:()=>"めくった人が飲む!", drink:true},
+  none:    {label:"セーフ(誰も飲まない)",           text:()=>"セーフ!", drink:false},
+  pick:    {label:"めくった人が指名→指名された人が飲む", text:()=>"めくった人が、飲ませる人を1人指名!", drink:true},
+  guard:   {label:"次にめくる人の「飲む」を肩代わり", text:()=>"次にめくる人の分を、めくった人が肩代わり!", drink:false},
+  all:     {label:"全員で乾杯(全員が飲む)",         text:()=>"全員で乾杯!", drink:true},
+  last:    {label:"一番最近飲んだ人がもう一度飲む",   text:()=>"さっき飲んだ人がもう一度飲む!", drink:true},
+  fixed:   {label:"決まった人が飲む(名前を指定)",   text:c=>`${(c.target||"").trim()||"指定の人"}さんが飲む!`, drink:true},
+  prev:    {label:"ひとつ前にめくった人が飲む",       text:()=>"ひとつ前にめくった人が飲む!", drink:true},
+  neighbor:{label:"めくった人と隣の人が一緒に飲む",   text:()=>"めくった人と隣の人が飲む!", drink:true}
 };
 const DEFAULT_CARDS = [
   {emoji:"🐺",name:"人狼",count:2,effect:"self"},
@@ -116,63 +99,34 @@ const DEFAULT_CARDS = [
 const $ = id => document.getElementById(id);
 const load = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? d; } catch { return d; } };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
-
-let players = load("wd_players", []);
-let cards = load("wd_cards_v5", DEFAULT_CARDS);
+const KEY = "wd_cards_v6";
+let cards = load(KEY, DEFAULT_CARDS);
 let g = null; // ゲーム状態
 
 /* ---------- 設定画面 ---------- */
-const MIN_P = 2, MAX_P = 12;
-function normPlayers(){
-  players = (Array.isArray(players) ? players : []).slice(0, MAX_P);
-  if (!players.length) players = ["プレイヤー1","プレイヤー2","プレイヤー3","プレイヤー4"];
-  while (players.length < MIN_P) players.push("プレイヤー" + (players.length+1));
-}
-function defaultName(){ let n = players.length+1; while (players.includes("プレイヤー"+n)) n++; return "プレイヤー"+n; }
-function renderPlayers(){
-  normPlayers();
-  $("countNum").textContent = players.length;
-  $("minusBtn").disabled = players.length <= MIN_P;
-  $("plusBtn").disabled = players.length >= MAX_P;
-  $("players").innerHTML = "";
-  players.forEach((p,i)=>{
-    const c = document.createElement("span");
-    c.className = "chip"; c.style.cursor = "pointer";
-    c.textContent = (i+1) + ". " + p;
-    c.onclick = () => {
-      const v = prompt("名前を変更", p);
-      if (v === null) return;
-      const n = v.trim().slice(0,12);
-      if (!n) return;
-      if (players.some((x,j) => j !== i && x === n)) { alert("同じ名前がいます"); return; }
-      players[i] = n; save("wd_players",players); renderPlayers();
-    };
-    $("players").append(c);
-  });
-}
 function renderCards(){
   const box = $("cardEdit"); box.innerHTML = "";
   cards.forEach((c,i)=>{
     const row = document.createElement("div"); row.className = "card-row";
     const mk = (val, key, extra={}) => {
       const el = document.createElement("input"); el.value = val; Object.assign(el, extra);
-      el.oninput = () => { cards[i][key] = key==="count" ? Math.max(0,parseInt(el.value)||0) : el.value; save("wd_cards_v5",cards); updateCount(); };
+      el.oninput = () => { cards[i][key] = key==="count" ? Math.max(0,parseInt(el.value)||0) : el.value; save(KEY,cards); updateCount(); };
       return el;
     };
     const em = mk(c.emoji,"emoji"); em.className = "e";
     row.append(em, mk(c.name,"name",{placeholder:"役職名"}), mk(c.count,"count",{type:"number",min:0,inputMode:"numeric"}));
     const sel = document.createElement("select");
-    for (const k in EFFECTS){ const o = document.createElement("option"); o.value=k; o.textContent=EFFECTS[k]; sel.append(o); }
+    for (const k in EFFECTS){ const o = document.createElement("option"); o.value=k; o.textContent=EFFECTS[k].label; sel.append(o); }
     sel.value = c.effect;
-    sel.onchange = () => { cards[i].effect = sel.value; if (sel.value === "fixed" && !cards[i].target) cards[i].target = "和田"; save("wd_cards_v5",cards); renderCards(); };
-    const del = document.createElement("button"); del.className="small"; del.textContent="削除"; del.style.gridColumn="1/-1";
-    del.onclick = () => { cards.splice(i,1); save("wd_cards_v5",cards); renderCards(); };
+    sel.onchange = () => { cards[i].effect = sel.value; if (sel.value === "fixed" && !cards[i].target) cards[i].target = "和田"; save(KEY,cards); renderCards(); };
     row.append(sel);
     if (c.effect === "fixed"){
       const t = document.createElement("input"); t.value = c.target || ""; t.placeholder = "飲む人の名前"; t.maxLength = 12; t.style.gridColumn = "1/-1";
-      t.oninput = () => { cards[i].target = t.value; save("wd_cards_v5",cards); };
+      t.oninput = () => { cards[i].target = t.value; save(KEY,cards); };
       row.append(t);
     }
+    const del = document.createElement("button"); del.className="small"; del.textContent="削除"; del.style.gridColumn="1/-1";
+    del.onclick = () => { cards.splice(i,1); save(KEY,cards); renderCards(); };
     row.append(del); box.append(row);
     if (i < cards.length-1){ const hr=document.createElement("hr"); hr.style.cssText="border:0;border-top:1px solid #ffffff18;margin:10px 0"; box.append(hr); }
   });
@@ -180,101 +134,62 @@ function renderCards(){
 }
 function updateCount(){ $("deckCount").textContent = "合計 " + cards.reduce((s,c)=>s+c.count,0) + " 枚"; }
 
-$("plusBtn").onclick = () => { if (players.length < MAX_P) { players.push(defaultName()); save("wd_players",players); renderPlayers(); } };
-$("minusBtn").onclick = () => { if (players.length > MIN_P) { players.pop(); save("wd_players",players); renderPlayers(); } };
-$("addCard").onclick = () => { cards.push({emoji:"🍺",name:"新カード",count:1,effect:"self"}); save("wd_cards_v5",cards); renderCards(); };
-$("resetCards").onclick = () => { if (confirm("カードを初期状態に戻しますか?")) { cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)); save("wd_cards_v5",cards); renderCards(); } };
+$("addCard").onclick = () => { cards.push({emoji:"🍺",name:"新カード",count:1,effect:"self"}); save(KEY,cards); renderCards(); };
+$("resetCards").onclick = () => { if (confirm("カードを初期状態に戻しますか?")) { cards = JSON.parse(JSON.stringify(DEFAULT_CARDS)); save(KEY,cards); renderCards(); } };
 
 /* ---------- ゲーム ---------- */
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
 
-$("startBtn").onclick = () => {
-  if (players.length < 2) { alert("参加者を2人以上追加してください"); return; }
+$("startBtn").onclick = start;
+function start(){
   const deck = [];
   cards.forEach(c => { for(let i=0;i<c.count;i++) deck.push(c); });
   if (!deck.length) { alert("山札が空です。枚数を設定してください"); return; }
-  g = { deck: shuffle(deck), turn: 0, lastDrinker: null, guard: null, waitingPick: false, log: [] };
+  g = { deck: shuffle(deck), flips: 0, anyDrank: false, guard: false };
   $("setup").classList.add("hidden"); $("game").classList.remove("hidden");
-  $("log").innerHTML = "";
-  showBack(); updateTurn(); showResult(null);
-};
+  $("log").innerHTML = ""; $("result").classList.add("hidden");
+  showBack(); updateRemain();
+}
 $("backBtn").onclick = () => { $("game").classList.add("hidden"); $("setup").classList.remove("hidden"); };
-$("restartBtn").onclick = () => { if (confirm("山札をシャッフルして最初からやり直しますか?")) $("startBtn").click(); };
+$("restartBtn").onclick = () => { if (confirm("山札をシャッフルして最初からやり直しますか?")) start(); };
 
 function showBack(){ $("deck").innerHTML = '<div class="card back">🍺</div>'; }
 function showFace(c){ $("deck").innerHTML = `<div class="card face"><div class="em">${esc(c.emoji)}</div><div class="nm">${esc(c.name)}</div></div>`; }
-function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
-function cur(){ return players[g.turn % players.length]; }
-function nextP(){ return players[(g.turn+1) % players.length]; }
-function updateTurn(){
-  $("turnName").textContent = cur();
+function updateRemain(){
   $("remain").textContent = g.deck.length ? `山札 残り ${g.deck.length} 枚` : "山札はもうありません";
   $("flipBtn").textContent = g.deck.length ? "山札をめくる" : "終了!もう一度遊ぶ";
 }
-function showResult(html, safe){
-  const r = $("result");
-  if (html == null){ r.classList.add("hidden"); return; }
-  r.classList.remove("hidden"); r.classList.toggle("safe", !!safe); r.innerHTML = html;
-}
-function addLog(t){ g.log.unshift(t); const d=document.createElement("div"); d.textContent=t; $("log").prepend(d); }
 
 $("flipBtn").onclick = () => {
-  if (g.waitingPick) return;
-  if (!g.deck.length) { $("startBtn").click(); return; }
-  const c = g.deck.shift(), me = cur();
+  if (!g.deck.length) { start(); return; }
+  const c = g.deck.shift(), ef = EFFECTS[c.effect] || EFFECTS.none;
   showFace(c);
-  let drinkers = [], note = "";
-  switch (c.effect){
-    case "self": drinkers = [me]; break;
-    case "none": break;
-    case "all": drinkers = [...players]; break;
-    case "prev": drinkers = [players[(g.turn - 1 + players.length) % players.length]]; note = "ひとつ前の人"; break;
-    case "fixed": drinkers = [(c.target || "").trim() || me]; break;
-    case "neighbor": drinkers = [...new Set([me, nextP()])]; break;
-    case "last":
-      if (g.lastDrinker){ drinkers = [g.lastDrinker]; note = "直近で飲んだ人"; }
-      else { drinkers = [me]; note = "まだ誰も飲んでいないので本人"; }
-      break;
-    case "guard":
-      g.guard = me; note = `次にめくる人の分を${me}が肩代わり`; break;
-    case "pick":
-      g.waitingPick = true;
-      showResult(`${esc(me)}さん、飲ませる人を指名!`, false);
-      const area = $("pickArea"); area.innerHTML = ""; area.classList.remove("hidden");
-      players.filter(p => p !== me).forEach(p => {
-        const b = document.createElement("button"); b.textContent = p;
-        b.onclick = () => { area.classList.add("hidden"); g.waitingPick = false; finish(c, me, [p], `${me}の指名`); };
-        area.append(b);
-      });
-      $("flipBtn").disabled = true;
-      return;
+  let text = ef.text(c), note = "";
+
+  // 前のカードが騎士なら、めくった人の分を肩代わり
+  const guarded = g.guard && c.effect !== "guard";
+  if (guarded){
+    if (["self","neighbor","all"].includes(c.effect)) note = "🛡️ めくった人の分は、騎士の人が肩代わり";
+    g.guard = false;
   }
-  finish(c, me, drinkers, note);
+  if (c.effect === "guard") g.guard = true;
+
+  if (c.effect === "prev" && g.flips === 0) { text = "最初なので、めくった人が飲む!"; }
+  if (c.effect === "last" && !g.anyDrank) { text = "まだ誰も飲んでいないので、めくった人が飲む!"; }
+  if (ef.drink) g.anyDrank = true;
+
+  const r = $("result");
+  r.classList.remove("hidden"); r.classList.toggle("safe", !ef.drink);
+  r.innerHTML = (ef.drink ? "🍻 " : "") + esc(text) + (note ? `<small>${esc(note)}</small>` : "");
+  if (navigator.vibrate) navigator.vibrate(ef.drink ? [120,60,120] : 40);
+
+  g.flips++;
+  const li = document.createElement("div");
+  li.textContent = `${g.flips}枚目:${c.emoji}${c.name} → ${text}${note ? "(" + note + ")" : ""}`;
+  $("log").prepend(li);
+  updateRemain();
 };
-
-function finish(c, me, drinkers, note){
-  // 騎士の肩代わり(前のカードで発動済み。今回のめくった人が飲む分を引き受ける)
-  if (g.guard && c.effect !== "guard"){
-    const guardian = g.guard, flipper = me;
-    if (drinkers.includes(flipper) && guardian !== flipper){
-      drinkers = [...new Set(drinkers.map(d => d === flipper ? guardian : d))];
-      note += (note ? " / " : "") + `🛡️${guardian}が${flipper}の分を肩代わり`;
-    }
-    g.guard = null;
-  }
-  if (drinkers.length) g.lastDrinker = drinkers[drinkers.length-1];
-  $("flipBtn").disabled = false;
-  if (navigator.vibrate) navigator.vibrate(drinkers.length ? [120,60,120] : 40);
-  if (drinkers.length){
-    const all = drinkers.length === players.length && players.length > 1;
-    showResult(`🍻 ${all ? "全員" : esc(drinkers.join("、")) + "さん"}が飲む!${note ? `<small>${esc(note)}</small>` : ""}`, false);
-  } else {
-    showResult(`${c.effect==="guard" ? "🛡️ 騎士!" : "セーフ!"}${note ? `<small>${esc(note)}</small>` : ""}`, true);
-  }
-  addLog(`${me}:${c.emoji}${c.name} → ${drinkers.length ? drinkers.join("、") + "が飲む" : "飲まない"}${note ? "(" + note + ")" : ""}`);
-  g.turn++; updateTurn();
-}
-
 
 /* ---------- PWA / 画面スリープ防止 ---------- */
 let wake = null;
@@ -285,7 +200,7 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 document.addEventListener("click", keepAwake, {once:true});
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(() => {});
 
-renderPlayers(); renderCards();
+renderCards();
 </script>
 </body>
 </html>
