@@ -42,11 +42,31 @@ input,select{font:inherit;color:var(--text);background:#1b1230;border:1px solid 
 .log{font-size:13px;color:var(--sub);max-height:140px;overflow:auto}
 .log div{padding:3px 0;border-bottom:1px solid #ffffff12}
 .status{text-align:center;color:var(--sub);font-size:13px;margin:6px 0}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs button{flex:1}
+.tabs button.on{background:var(--accent);font-weight:700}
+.fighters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.fighter{background:var(--panel);border-radius:14px;padding:10px;text-align:center;border:3px solid transparent}
+.fighter.active{border-color:var(--accent)}
+.fighter .em{font-size:48px;line-height:1.1}
+.fighter .fn{font-weight:700;margin-top:2px;word-break:break-all}
+.fighter .fr{font-size:12px;color:var(--sub)}
+.hp{height:12px;background:#0006;border-radius:99px;overflow:hidden;margin-top:6px}
+.hp i{display:block;height:100%;background:var(--ok);transition:width .4s}
+.hp i.low{background:var(--accent)}
+.tag{font-size:12px;color:var(--sub);min-height:16px;margin-top:4px}
+.moves{display:grid;gap:8px;margin:10px 0}
+.moves button{text-align:left;padding:12px 14px}
+.moves button small{display:block;color:var(--sub);font-size:12px}
+.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
 </style>
 </head>
 <body>
 <main>
 <h1>🐺 人狼めくり</h1>
+<div class="tabs"><button id="tabFlip" class="on">めくり</button><button id="tabBattle">⚔️ バトル</button></div>
 
 <!-- 設定画面 -->
 <section id="setup">
@@ -79,8 +99,26 @@ input,select{font:inherit;color:var(--text);background:#1b1230;border:1px solid 
   <h2>ログ</h2>
   <div class="panel log" id="log"></div>
 </section>
-</main>
 
+<!-- バトル設定 -->
+<section id="bsetup" class="hidden">
+  <h2>ファイター</h2>
+  <div class="panel" id="bfighters"></div>
+  <div class="status">HPが0になった方が負け。負けた人が飲む!</div>
+  <button class="primary" id="bstart">バトル開始</button>
+</section>
+
+<!-- バトル画面 -->
+<section id="battle" class="hidden">
+  <div class="fighters" id="bboard"></div>
+  <div class="turn"><b id="bturn"></b> の番</div>
+  <div class="moves" id="bmoves"></div>
+  <div class="result safe hidden" id="bresult"></div>
+  <div class="row"><button class="small" id="bback">設定に戻る</button><button class="small" id="brestart">同じ組み合わせで再戦</button></div>
+  <h2>ログ</h2>
+  <div class="panel log" id="blog"></div>
+</section>
+</main>
 <script>
 const EFFECTS = {
   self:"めくった本人が飲む",
@@ -240,6 +278,120 @@ function finish(c, me, drinkers, note){
   }
   addLog(`${me}:${c.emoji}${c.name} → ${drinkers.length ? drinkers.join("、") + "が飲む" : "飲まない"}${note ? "(" + note + ")" : ""}`);
   g.turn++; updateTurn();
+}
+
+
+/* ---------- モード切り替え ---------- */
+const SECTIONS = ["setup","game","bsetup","battle"];
+function show(id){ SECTIONS.forEach(x => $(x).classList.toggle("hidden", x !== id)); }
+$("tabFlip").onclick = () => { $("tabFlip").classList.add("on"); $("tabBattle").classList.remove("on"); show(g ? "game" : "setup"); };
+$("tabBattle").onclick = () => { $("tabBattle").classList.add("on"); $("tabFlip").classList.remove("on"); if (b) show("battle"); else { renderBSetup(); show("bsetup"); } };
+
+/* ---------- バトル ---------- */
+const HP_MAX = 30;
+const ROLES = {
+  wolf:  {emoji:"🐺",name:"人狼",  moves:[{n:"かみつく",t:"atk",d:8,acc:100},{n:"襲撃",t:"atk",d:15,acc:60},{n:"遠吠え",t:"buff"}]},
+  seer:  {emoji:"🔮",name:"占い師",moves:[{n:"凶星",t:"atk",d:9,acc:90},{n:"予知",t:"guard"},{n:"祈り",t:"heal",d:8}]},
+  knight:{emoji:"🛡️",name:"騎士",  moves:[{n:"剣撃",t:"atk",d:8,acc:95},{n:"突撃",t:"atk",d:12,acc:75},{n:"盾構え",t:"guard"}]},
+  fox:   {emoji:"🦊",name:"妖狐",  moves:[{n:"狐火",t:"atk",d:7,acc:100},{n:"化かす",t:"atk",d:11,acc:80},{n:"変化",t:"heal",d:6}]},
+  mayor: {emoji:"👑",name:"村長",  moves:[{n:"号令",t:"atk",d:10,acc:85},{n:"演説",t:"buff"},{n:"酒盛り",t:"heal",d:10}]}
+};
+let b = null;
+let bsel = load("wd_battle", {names:["",""],roles:["wolf","knight"]});
+
+function moveDesc(m){
+  return {atk:`攻撃 ${m.d}ダメージ(命中${m.acc}%)`,
+          heal:`HPを${m.d}回復`,
+          guard:"次に受けるダメージを半分にする",
+          buff:"次の攻撃のダメージ+5"}[m.t];
+}
+function renderBSetup(){
+  const box = $("bfighters"); box.innerHTML = "";
+  for (let i=0;i<2;i++){
+    const wrap = document.createElement("div");
+    const name = document.createElement("input");
+    name.placeholder = `プレイヤー${i+1}の名前`; name.maxLength = 12; name.style.width = "100%";
+    name.value = bsel.names[i] || players[i] || "";
+    name.oninput = () => { bsel.names[i] = name.value; save("wd_battle",bsel); };
+    const sel = document.createElement("select"); sel.style.cssText = "width:100%;margin-top:6px";
+    for (const k in ROLES){ const o=document.createElement("option"); o.value=k; o.textContent=ROLES[k].emoji+" "+ROLES[k].name; sel.append(o); }
+    sel.value = bsel.roles[i];
+    const info = document.createElement("div"); info.className = "status"; info.style.textAlign = "left";
+    const upd = () => { info.innerHTML = ROLES[sel.value].moves.map(m => `・${esc(m.n)}:${moveDesc(m)}`).join("<br>"); };
+    sel.onchange = () => { bsel.roles[i] = sel.value; save("wd_battle",bsel); upd(); };
+    upd();
+    wrap.append(name, sel, info);
+    box.append(wrap);
+    if (i === 0){ const hr=document.createElement("hr"); hr.style.cssText="border:0;border-top:1px solid #ffffff18;margin:12px 0"; box.append(hr); }
+  }
+}
+function startBattle(){
+  const names = [0,1].map(i => (bsel.names[i] || players[i] || `プレイヤー${i+1}`).trim() || `プレイヤー${i+1}`);
+  if (names[0] === names[1]) names[1] += "2";
+  b = { f: [0,1].map(i => ({name:names[i], role:ROLES[bsel.roles[i]], hp:HP_MAX, guard:false, buff:false})), turn: Math.floor(Math.random()*2), over:false };
+  $("blog").innerHTML = ""; $("bresult").classList.add("hidden");
+  show("battle"); renderBattle();
+  blog(`${b.f[b.turn].name}の先攻!`);
+}
+$("bstart").onclick = startBattle;
+$("brestart").onclick = startBattle;
+$("bback").onclick = () => { b = null; renderBSetup(); show("bsetup"); };
+
+function blog(t){ const d=document.createElement("div"); d.textContent=t; $("blog").prepend(d); }
+function renderBattle(){
+  $("bboard").innerHTML = b.f.map((f,i) => {
+    const pct = Math.max(0, f.hp/HP_MAX*100);
+    const tags = [f.guard?"🛡️防御中":"", f.buff?"💪強化中":""].filter(Boolean).join(" ");
+    return `<div class="fighter ${i===b.turn&&!b.over?"active":""}" id="fi${i}">
+      <div class="em">${f.role.emoji}</div><div class="fn">${esc(f.name)}</div><div class="fr">${esc(f.role.name)}</div>
+      <div class="hp"><i class="${pct<35?"low":""}" style="width:${pct}%"></i></div>
+      <div class="fr">HP ${f.hp}/${HP_MAX}</div><div class="tag">${tags}</div></div>`;
+  }).join("");
+  const me = b.f[b.turn];
+  $("bturn").textContent = me.name; $("bturn").parentElement.style.visibility = b.over ? "hidden" : "visible";
+  $("bmoves").innerHTML = "";
+  if (b.over) return;
+  me.role.moves.forEach(m => {
+    const btn = document.createElement("button");
+    btn.innerHTML = `${esc(m.n)}<small>${moveDesc(m)}</small>`;
+    btn.onclick = () => useMove(m);
+    $("bmoves").append(btn);
+  });
+}
+function useMove(m){
+  const me = b.f[b.turn], foe = b.f[1-b.turn];
+  let msg;
+  if (m.t === "atk"){
+    if (Math.random()*100 >= m.acc) msg = `${me.name}の${m.n}!……ミス!`;
+    else {
+      let d = m.d + (me.buff ? 5 : 0);
+      me.buff = false;
+      let extra = "";
+      if (foe.guard){ d = Math.ceil(d/2); foe.guard = false; extra = "(防御で半減)"; }
+      foe.hp = Math.max(0, foe.hp - d);
+      msg = `${me.name}の${m.n}!${foe.name}に${d}ダメージ${extra}`;
+      const el = $("fi"+(1-b.turn)); if (el){ el.classList.remove("shake"); void el.offsetWidth; el.classList.add("shake"); }
+    }
+  } else if (m.t === "heal"){
+    const before = me.hp; me.hp = Math.min(HP_MAX, me.hp + m.d);
+    msg = `${me.name}の${m.n}!HPが${me.hp-before}回復`;
+  } else if (m.t === "guard"){
+    me.guard = true; msg = `${me.name}の${m.n}!次のダメージを半減`;
+  } else {
+    me.buff = true; msg = `${me.name}の${m.n}!次の攻撃が強化された`;
+  }
+  blog(msg);
+  if (foe.hp <= 0){
+    b.over = true; renderBattle();
+    const r = $("bresult"); r.classList.remove("hidden"); r.classList.remove("safe");
+    r.innerHTML = `🏆 ${esc(me.name)}の勝ち!<span>🍻 ${esc(foe.name)}さんが飲む!</span>`;
+    blog(`決着!${foe.name}が飲む`);
+    return;
+  }
+  b.turn = 1 - b.turn;
+  $("bresult").classList.add("hidden");
+  renderBattle();
+  $("bresult").classList.remove("hidden"); $("bresult").classList.add("safe"); $("bresult").textContent = msg;
 }
 
 renderPlayers(); renderCards();
