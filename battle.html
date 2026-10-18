@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pokemon battle</title>
+<link rel="stylesheet" type="text/css" href="css/battle.css">
+</head>
+<body>
+	<div id="message" class="hidden"></div>
+	<div id="loading">読み込み中...</div>
+
+	<div id="battle" class="hidden">
+		<div id="game-screen">
+			<img id="enemyImg" alt="">
+
+			<div id="enemy-stats-window" class="stats-window">
+				<div id="enemy-name" class="pokemon-name"></div>
+				<div class="pokemon-level">Lv：<span id="enemy-pokemon-level"></span></div>
+				<div id="enemy-ailment-stats" class="aliment-stats"></div>
+				<div id="enemy-hp-frame" class="hp-frame">
+					<div id="enemy-hp-bar" class="hp-bar"></div>
+					<div id="enemy-hp-mark" class="mark"></div>
+				</div>
+
+				<div id="enemy-hp-value" class="hidden">
+					<span id="enemy-current-hp"></span>
+					<span> / </span>
+					<span id="enemy-max-hp"></span>
+				</div>
+				<div class="pokemon-stats hidden">
+					<div id="enemy-types"></div>
+					<div id="enemy-attack"></div>
+					<div id="enemy-defense"></div>
+					<div id="enemy-special-attack"></div>
+					<div id="enemy-special-defense"></div>
+					<div id="enemy-speed"></div>
+				</div>
+			</div>
+
+			<img id="myImg" alt="">
+
+			<div id="my-stats-window" class="stats-window">
+				<div id="my-name" class="pokemon-name"></div>
+				<div class="pokemon-level">Lv：<span id="my-pokemon-level"></span></div>
+				<div id="my-ailment-stats" class="aliment-stats"></div>
+				<div id="my-hp-frame" class="hp-frame">
+					<div id="my-hp-bar" class="hp-bar"></div>
+					<div id="my-hp-mark" class="mark"></div>
+				</div>
+
+				<div id="my-hp-value">
+					<span id="my-current-hp"></span>
+					<span> / </span>
+					<span id="my-max-hp"></span>
+				</div>
+				<div class="pokemon-stats hidden">
+					<div id="my-types"></div>
+					<div id="my-attack"></div>
+					<div id="my-defense"></div>
+					<div id="my-special-attack"></div>
+					<div id="my-special-defense"></div>
+					<div id="my-speed"></div>
+				</div>
+			</div>
+		</div>
+
+		<div id="message-window">
+			<span id="other-message"></span>
+			<span id="pokemon-name-message"></span><br>
+			<span id="move-message"></span><br>
+			<span id="effective-message"></span>
+		</div>
+
+		<div class="command" id="my-commands"></div>
+
+		<button id="reset" class="hidden">リセット</button>
+
+		<div class="command" id="enemy-commands"></div>
+	</div>
+
+	<div><a href="index.html">もどる</a></div>
+
+	<script src="js/translations.js"></script>
+	<script src="js/common.js"></script>
+	<script src="js/jquery-3.6.4.min.js"></script>
+	<script src="js/battle-page.js"></script>
+</body>
+</html>

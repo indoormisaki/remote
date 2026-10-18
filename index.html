@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pokemon sample</title>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<style>.hidden { display: none; }</style>
+</head>
+<body>
+	<form action="pokedex.html" method="get">
+		<div>
+			<select name="id" class="pokemon-select"></select>
+		</div>
+		<div>
+			<input type="submit" value="図鑑を見る">
+		</div>
+	</form>
+
+	<form action="battle.html" method="get">
+		<div>
+			<span>あなたのポケモン</span>
+			<select name="my" class="pokemon-select"></select>
+		</div>
+		<div>
+			<span>あいてのポケモン</span>
+			<select name="enemy" class="pokemon-select"></select>
+		</div>
+		<div>
+			<input type="submit" value="バトル開始">
+		</div>
+	</form>
+
+	<script src="js/translations.js"></script>
+	<script src="js/index.js"></script>
+</body>
+</html>
